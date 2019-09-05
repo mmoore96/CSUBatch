@@ -10,7 +10,7 @@
 #include <stdbool.h>
 
 int start_ui();
-void run(char*);
+void run();
 void list();
 void fcfs();
 void sjf();
