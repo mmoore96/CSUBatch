@@ -22,6 +22,7 @@ void free_job(Job* job){
 }
 
 
+//Formats a string containing 'job's information, and places it in 'string'
 void job_string(Job* job, char* string){
     sprintf(string, "Name %s, Time %d, Priority %d", job->name, job->time, job->priority);
 }

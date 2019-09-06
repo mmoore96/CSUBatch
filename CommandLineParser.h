@@ -18,8 +18,7 @@ void set_priority();
 void test();
 void quit();
 void help();
-char** parse_input(int argc);
-void** parse_input2(int argc, void* argv[]);
+bool parse_input(int argc, char* argv[]);
 typedef void (*command_array)();
 
 

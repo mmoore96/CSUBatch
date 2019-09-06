@@ -23,7 +23,7 @@ Job* get_job_aux(struct Node* n, int i){
     }
 }
 
-Job pop(JobQueue* q){
+Job dequeue(JobQueue* q){
     struct Node *first_node = q->first; //Grab the pointer to the first node in the queue
     Job first_job = *first_node->job;    //Grab a copy of the job
     q->first = q->first->next;          //Adjust the queue so it now points to the next node as first
@@ -32,7 +32,7 @@ Job pop(JobQueue* q){
     return first_job;                   //Return job
 }
 
-void push(JobQueue* q, Job *job){
+void enqueue(JobQueue* q, Job *job){
     struct Node* node_ptr = malloc(sizeof(struct Node));  //Allocate memory for new node
     printf("NODE POINTER %p ALLOCATED\n", (void*)node_ptr);
     node_ptr->job = job;                                  //Set the job of new node.

@@ -25,10 +25,10 @@ typedef struct{
 Job* get_first(JobQueue* q);
 Job* get_job(JobQueue* q, int i);
 Job* get_job_aux(struct Node* n, int i);
-Job pop(JobQueue* q);
+Job dequeue(JobQueue* q);
 void free_jobs(JobQueue* q);
 void free_jobs_aux(struct Node* n);
-void push(JobQueue* q, Job* job);
+void enqueue(JobQueue* q, Job* job);
 int length(JobQueue* q);
 
 #endif //CSUBATCH_JOBQUEUE_H
