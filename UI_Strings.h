@@ -20,11 +20,6 @@
 
 #define AUTHORS "Tayler Cooper & George Moore"
 
-//The maximum number of characters to compare against each possible command string
-//is 10. This number is arbitrary, but must be larger than the longest possible command string, otherwise
-//input like 'runaad' will call run() and priorityasda would run priority().
-#define MAX_CHARS 10
-
 #define prompt "Welcome to %s's batch job scheduler Version 0.0\n \
                 Type 'help' to find more about CSUbatch commands.\n"
 
