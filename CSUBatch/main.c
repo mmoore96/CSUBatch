@@ -5,7 +5,7 @@
 //  Created by Michael Moore on 9/4/19.
 //  Copyright © 2019 George Moore. All rights reserved.
 //
-
+//updated with git and xcode
 #include <stdio.h>
 #include "CommandLineParser.h"
 #include <stdlib.h>
