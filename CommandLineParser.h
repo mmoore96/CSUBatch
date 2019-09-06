@@ -19,6 +19,7 @@ void test();
 void quit();
 void help();
 char** parse_input(int argc);
+void** parse_input2(int argc, void* argv[]);
 typedef void (*command_array)();
 
 

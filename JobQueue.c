@@ -51,8 +51,7 @@ void free_jobs_aux(struct Node* n){
         printf("NODE POINTER %p FREED\n", (void*) n);
         printf("JOB->NAME POINTER %p FREED\n", (void*) n->job->name);
         printf("JOB POINTER %p FREED\n", (void*) n->job);
-        free(n->job->name);
-        free(n->job);
+        free_job(n->job);
         free(n);
     }
 }

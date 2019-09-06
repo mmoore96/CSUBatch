@@ -3,7 +3,6 @@
 //
 
 #include "CommandLineParser.h"
-#include "UI_Strings.h"
 #include "Scheduler.h"
 #include "Job.h"
 #include "JobQueue.h"
@@ -12,10 +11,8 @@
 
 //The following arrays contain the command strings that execute commands, and the commands themselves, respectively.
 //Because they are the same length and are ordered the same, each index provides a mapping between each string and its command.
-//The run string and command are ommitted because the run function contains parameters, and can't be added to the function array.
 const char* string_array[] = {run_str, list_str, fcfs_str, sjf_str, priority_str, test_str, help_str, quit_str};
 command_array (commands[8]) = {run, list, set_fcfs, set_sjf, set_priority, test, help, quit};
-#define STRING_SIZE 25
 
 bool active = true;
 char in[255] = "";
@@ -53,28 +50,40 @@ int start_ui(){
 }
 
 void run(){
-    Job* job = malloc(sizeof(Job));
-    job->name = malloc(STRING_SIZE);
-    printf("JOB POINTER %p ALLOCATED\n", (void*)job);
-    char **argv = parse_input(3);
-    strncpy(job->name, argv[0], STRING_SIZE);
-    job->job_time = strtol(argv[1], NULL, 0);
-    job->priority = strtol(argv[2], NULL, 0);
+    char name[25];
+    char time[25];
+    char priority[25];
+
+    int time1 = (int)strtol(time, NULL, 0);
+    int priority1 = (int)strtol(priority, NULL, 0);
+
+    void *argv[3] = {name, time, priority};
+    parse_input2(3, argv);
+    //char **argv = parse_input(3); //Parse input into array of arguments
+
+    //name = argv[0];   //Extract name
+    //time = (int)strtol(argv[1], NULL, 0); //Extract job time
+    //priority = (int)strtol(argv[2], NULL, 0); //Extract priority
+
+    Job* job = create_job(name, time1, priority1); //create job
+
     //TODO: BELOW IS THE CODE FOR FREEING MEMORY ALLOCATED IN PARSE_INPUT FOR STORING THE ARGUMENTS; THIS SHOULD BE REFACTORED INTO A SEPARATE FUNCTION OR SOMETHING
     //TODO: OR REFACTOR PARSE_INPUT TO AVOID ALLOCATING MEMORY
-    for (int i = 0; i < 3; i ++){
-        printf("Freeing pointer %p\n", (void*)argv[i]);
-        free(argv[i]);
-    }
-    //TODO: GIVE JOB TO SCHEDULER; REFACTOR THE CODE BELOW
+    //for (int i = 0; i < 3; i ++){
+      //  printf("Freeing pointer %p\n", (void*)argv[i]);
+        //free(argv[i]);
+    //}
+    //TODO: GIVE JOB TO SCHEDULER; REFACTOR THE CODE BELOW WHEN SCHEDULER MODULE AVAILABLE
     push(&q, job);
 
 }
 
 void  list(){
+    char string[255] = "";
     for (int i = 0; i < q.length; i ++){
         Job* job = get_job(&q, i);
-        printf("Name: %s, Time: %d, Priority Enum: %d\n", job->name, job->job_time, job->priority);
+        job_string(job, string);
+        printf("Job number %d\n\t %s\n", i, string);
     }
 }
 
@@ -118,7 +127,7 @@ char** parse_input(int argc){
         printf("WARNING: null array\n");
     }
     for (int i = 0; i < argc; i ++){
-        argv[i]= malloc(STRING_SIZE + 1);  //TODO: SOFTCODE OR BETTER HANDLE THE MAX SPACE FOR EACH ARGUMENT. THIS IS A TEMPORARY SOLUTION
+        argv[i]= malloc(ARGUMENT_SIZE + 1);  //TODO: SOFTCODE OR BETTER HANDLE THE MAX SPACE FOR EACH ARGUMENT. THIS IS A TEMPORARY SOLUTION
         if (!argv[i]){
             printf("WARNING: null pointer\n");
             free(argv);
@@ -127,7 +136,33 @@ char** parse_input(int argc){
 
     }
     for (int i = 0; i < argc; i ++){
-        strncpy(argv[i], strtok(NULL, " "), STRING_SIZE + 1);
+        strncpy(argv[i], strtok(NULL, " "), ARGUMENT_SIZE + 1);
+        if (argv[i] == NULL){
+            printf("ERROR: Too few arguments. Use help\n");
+            error = true;
+            break;
+
+        }
+    }
+    if (strtok(NULL, " ") != NULL){
+        printf("ERROR: Too many arguments. Use help\n");
+        error = true;
+    }
+    if (error){
+        argv = NULL;
+    }
+    return argv;
+}
+
+void** parse_input2(int argc, void* argv[]){
+    bool error = false;
+    //TODO: Ensure that allocating an array like below at runtime is safe, otherwise hardcode it to 6, since that's the max number of arguments for any command (only test command takes 6 args)
+
+    if (!argv){
+        printf("WARNING: null array\n");
+    }
+    for (int i = 0; i < argc; i ++){
+        strncpy(argv[i], strtok(NULL, " "), ARGUMENT_SIZE + 1);
         if (argv[i] == NULL){
             printf("ERROR: Too few arguments. Use help\n");
             error = true;

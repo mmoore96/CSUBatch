@@ -4,8 +4,8 @@
 // I've put them in a dedicated file for modularity
 //
 
-#ifndef CSUBATCH_UI_STRINGS_H
-#define CSUBATCH_UI_STRINGS_H
+#ifndef CSUBATCH_CONSTANTS_H
+#define CSUBATCH_CONSTANTS_H
 
 //The following are strings which will be compared against the user input when deciding what command to execute.
 //I've read that macros are more effective as basic constants than variable definitions. Feel free to correct me.
@@ -17,6 +17,9 @@
 #define test_str "test"
 #define help_str "help"
 #define quit_str "quit"
+
+//This macro defines the maximum character length of each user argument.
+#define ARGUMENT_SIZE 25
 
 #define AUTHORS "Tayler Cooper & George Moore"
 
@@ -35,4 +38,4 @@ test: <benchmark> <policy> <num_of_jobs> <priority_levels>\n \
 \t <min_CPU_time> <max_CPU_time>\n \
 quit: exit CSUbatch\n"
 
-#endif //CSUBATCH_UI_STRINGS_H
+#endif //CSUBATCH_CONSTANTS_H
