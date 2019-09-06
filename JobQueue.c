@@ -34,7 +34,7 @@ Job pop(JobQueue* q){
 
 void push(JobQueue* q, Job *job){
     struct Node* node_ptr = malloc(sizeof(struct Node));  //Allocate memory for new node
-    printf("NODE POINTER %ld ALLOCATED", (long)node_ptr);
+    printf("NODE POINTER %p ALLOCATED\n", (void*)node_ptr);
     node_ptr->job = job;                                  //Set the job of new node.
     node_ptr->next = q->first;                            //Set the next node of new node to be the current first node of the queue
     q->first = node_ptr;                                  //Set the first node of the queue to be the new node
@@ -48,8 +48,10 @@ void free_jobs(JobQueue* q){
 void free_jobs_aux(struct Node* n){
     if (n != NULL) {
         free_jobs_aux(n->next);
-        printf("NODE POINTER %ld FREED", (long) n);
-        printf("JOB POINTER %ld FREED", (long) n->job);
+        printf("NODE POINTER %p FREED\n", (void*) n);
+        printf("JOB->NAME POINTER %p FREED\n", (void*) n->job->name);
+        printf("JOB POINTER %p FREED\n", (void*) n->job);
+        free(n->job->name);
         free(n->job);
         free(n);
     }
