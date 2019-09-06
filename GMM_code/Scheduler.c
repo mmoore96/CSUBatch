@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 
-void* schuduler_main (void *arg){
-    printf("schudluer worked!!!!\n");
+void* scheduler_main (void *arg){
+    printf("scheduler worked!!!!\n");
     return NULL;
 }
