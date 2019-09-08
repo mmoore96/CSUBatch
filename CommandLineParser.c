@@ -26,17 +26,11 @@ char in[255] = "";
 char error_log[255] = "";
 
 
-//TODO: Remove this line below when necessary
-JobQueue q;  //A temporary space to store jobs and debug them until the scheduler is set up. After which, jobs will be
-// Given directly to to the scheduler.
-
-
-
 //This is the main loop of the command loop. It prints the initial prompt, initializes our input buffer,
 //and begins looping, asking for input and carrying out tasks until 'quit' is entered and returns from the loop.
 
 int start_ui(){
-    q.first = NULL; //TODO: This is a temporary storage space for our jobs. They need to be placed in JobQueue.h I think
+    create_job_queue();
     char* command_name; //The first word of the user input will be interpreted as the command to be called.
     printf(prompt, AUTHORS);    //Print welcome prompt
     while (active){
@@ -60,16 +54,16 @@ int start_ui(){
             printf("ERROR: %s", error_log); //Print error
             error_log[0] = '\0'; //Clear error
         }
-
+        strcpy(in, "");
     }
     return 0;
 }
 
 void run(){
     //Declare pointers to hold the job name, time and priority, which will be parsed from the users input
-    char name_ptr[25];
-    char time_ptr[25];
-    char priority_ptr[25];
+    char name_ptr[100];
+    char time_ptr[100];
+    char priority_ptr[100];
 
     //Wrap into an array to pass into parse_input
     char *argv[3] = {name_ptr, time_ptr, priority_ptr};
@@ -79,7 +73,7 @@ void run(){
         int time = (int)strtol(time_ptr, NULL, 0); //Convert time from string to int
         int priority = (int)strtol(priority_ptr, NULL, 0); //Convert priority from string to int
         Job* job = create_job(name_ptr, time, priority); //create job
-        enqueue(&q, job); //Add to queue
+        enqueue(job); //Add to queue
     }
 }
 
@@ -87,8 +81,8 @@ void run(){
 //Prints job information
 void list(){
     char string[255] = "";
-    for (int i = 0; i < q.length; i ++){
-        Job* job = get_job(&q, i);
+    for (int i = 0; i < job_queue_length(); i ++){
+        Job* job = get_job(i);
         job_string(job, string);
         printf("Job number %d\n\t %s\n", i, string);
     }
@@ -112,7 +106,7 @@ void test(){
 
 void quit(){
     //Free up all job memory
-    free_jobs(&q);
+    free_job_queue();
     active = false;
 }
 
@@ -131,17 +125,21 @@ bool parse_input(int argc, char* argv[]){
     //Copy each whitespace separated word into each argv index
     for (int i = 0; i < argc; i ++){
         strncpy(argv[i], strtok(NULL, " "), ARGUMENT_SIZE + 1);
+        if (strlen(argv[i]) > 100){
+            strcpy(error_log, "ERROR: Maximum argument size 100 exceeded. Arguments must be 100 characters or fewer");
+            success = false;
+            break;
+        }
+        printf("%d\n", (signed int)strlen(argv[i]));
         if (argv[i] == NULL){
             strcpy(error_log, "ERROR: Too few arguments. Try help.");
             success = false;
             break;
-
         }
     }
     //If a word remains in the input string after the appropriate number of arguments have been taken, abort.
     if (strtok(NULL, " ") != NULL){
         strcpy(error_log, "ERROR: Too many arguments. Try help.");
-        printf("ERROR: Too many arguments. Use help\n");
         success = false;
     }
     return success;
