@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
     pthread_create(&thr[0], NULL, run_scheduler, &thr_data[0]);
     pthread_create(&thr[1], NULL, run_dispatcher, &thr_data[1]);
     start_ui();
+    printf("Waiting for threads to join...\n");
     active = false;
     /* block until all threads complete */
     for (i = 0; i < NUM_THREADS; ++i) {

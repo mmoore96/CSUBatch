@@ -73,31 +73,26 @@ void run(){
         int time = (int)strtol(time_ptr, NULL, 0); //Convert time from string to int
         int priority = (int)strtol(priority_ptr, NULL, 0); //Convert priority from string to int
         Job* job = create_job(name_ptr, time, priority); //create job
-        enqueue(job); //Add to queue
+        post(job); //Post to scheduler
     }
 }
 
 //TODO: Check for buffer overflow event
 //Prints job information
 void list(){
-    char string[255] = "";
-    for (int i = 0; i < job_queue_length(); i ++){
-        Job* job = get_job(i);
-        job_string(job, string);
-        printf("Job number %d\n\t %s\n", i, string);
-    }
+    print_job_queue();
 }
 
 void set_fcfs(){
-
+    set_fcfs_scheduling();
 }
 
 void set_sjf(){
-
+    set_sjf_scheduling();
 }
 
 void set_priority(){
-
+    set_priority_scheduling();
 }
 
 void test(){
@@ -130,7 +125,6 @@ bool parse_input(int argc, char* argv[]){
             success = false;
             break;
         }
-        printf("%d\n", (signed int)strlen(argv[i]));
         if (argv[i] == NULL){
             strcpy(error_log, "ERROR: Too few arguments. Try help.");
             success = false;

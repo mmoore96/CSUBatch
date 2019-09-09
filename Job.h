@@ -7,11 +7,13 @@
 #include <stdlib.h>
 #include "Constants.h"
 #include <string.h>
+#include <time.h>
 
 typedef struct{
     char* name;
     int priority;
-    int time;
+    int duration;
+    time_t age;
 
 }Job;
 

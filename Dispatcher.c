@@ -7,7 +7,6 @@
 #include <stdio.h>
 
 void* run_dispatcher(void *_data){
-    printf("Dispatcher thread created\n");
     thread_data_t *data;
     data = (thread_data_t*)_data;
     int id = data->tid;

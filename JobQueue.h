@@ -28,16 +28,18 @@ Node* __job_queue;
 //pointing to the job being received.
 //Functions that return int return and exit code; and exit code of non-zero indicates an error occurred.
 int create_job_queue();
+Node* get_queue();
 Job* get_job(int index);
 Job* __get_job_aux(int index, Node* q);
 Node* get_node(int index);
 Node* __get_node_aux(int index, Node* q);
 Job* get_last_job();
-Job* dequeue();
+Job dequeue();
 int free_job_queue();
-int __free_jobs_aux();
+int __free_job_queue_aux(Node* q);
 int enqueue(Job* job);
 int job_queue_length();
 int __job_queue_length_aux(int count, Node* q);
+void print_job_queue();
 
 #endif //CSUBATCH_JOBQUEUE_H

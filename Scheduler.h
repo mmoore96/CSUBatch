@@ -8,13 +8,19 @@
 #include "main.h"
 #include "JobQueue.h"
 #include "unistd.h"
+#include "SchedulingPolicies.h"
 #define fcfs_enum 0
 #define sjf_num 1
 #define priority_num 2
 
 
-
+int (*schedule_comparator)(Job, Job);
 void* run_scheduler(void *data);
+void post(Job* job);
+void set_priority_scheduling();
+void set_fcfs_scheduling();
+void set_sjf_scheduling();
+void insert(Job* job, Node* q);
 
 
 #endif //CSUBATCH_SCHEDULER_H
