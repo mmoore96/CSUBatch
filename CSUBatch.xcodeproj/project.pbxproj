@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A578F7612326E6DA00E55FC7 /* JobQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = A578F7602326E6DA00E55FC7 /* JobQueue.c */; };
+		A578F7642326E73F00E55FC7 /* SchedulingPolicies.c in Sources */ = {isa = PBXBuildFile; fileRef = A578F7632326E73F00E55FC7 /* SchedulingPolicies.c */; };
 		A5A8766E232072DC0075A687 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = A5A8766D232072DC0075A687 /* main.c */; };
 		A5A87676232077280075A687 /* CommandLineParser.c in Sources */ = {isa = PBXBuildFile; fileRef = A5A87675232077280075A687 /* CommandLineParser.c */; };
 		A5A87679232077500075A687 /* Dispatcher.c in Sources */ = {isa = PBXBuildFile; fileRef = A5A87678232077500075A687 /* Dispatcher.c */; };
@@ -27,6 +29,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A578F75D2326E62500E55FC7 /* Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
+		A578F75E2326E68600E55FC7 /* Errors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Errors.h; sourceTree = "<group>"; };
+		A578F75F2326E6DA00E55FC7 /* JobQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JobQueue.h; sourceTree = "<group>"; };
+		A578F7602326E6DA00E55FC7 /* JobQueue.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = JobQueue.c; sourceTree = "<group>"; };
+		A578F7622326E73F00E55FC7 /* SchedulingPolicies.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SchedulingPolicies.h; sourceTree = "<group>"; };
+		A578F7632326E73F00E55FC7 /* SchedulingPolicies.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SchedulingPolicies.c; sourceTree = "<group>"; };
+		A578F7682326F40300E55FC7 /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
 		A5A8766A232072DC0075A687 /* CSUBatch */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CSUBatch; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5A8766D232072DC0075A687 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		A5A87674232077280075A687 /* CommandLineParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommandLineParser.h; sourceTree = "<group>"; };
@@ -71,13 +80,20 @@
 			isa = PBXGroup;
 			children = (
 				A5A8766D232072DC0075A687 /* main.c */,
+				A578F7682326F40300E55FC7 /* main.h */,
 				A5A87674232077280075A687 /* CommandLineParser.h */,
 				A5A87677232077500075A687 /* Dispatcher.h */,
+				A578F75E2326E68600E55FC7 /* Errors.h */,
+				A578F75D2326E62500E55FC7 /* Constants.h */,
 				A5A87678232077500075A687 /* Dispatcher.c */,
 				A5A8767A232077890075A687 /* Job.h */,
+				A578F75F2326E6DA00E55FC7 /* JobQueue.h */,
+				A578F7602326E6DA00E55FC7 /* JobQueue.c */,
 				A5A8767B232077890075A687 /* Job.c */,
 				A5A87675232077280075A687 /* CommandLineParser.c */,
 				A5A8767D232077B30075A687 /* Scheduler.h */,
+				A578F7622326E73F00E55FC7 /* SchedulingPolicies.h */,
+				A578F7632326E73F00E55FC7 /* SchedulingPolicies.c */,
 				A5A8767E232077B30075A687 /* Scheduler.c */,
 				A5A87680232077E90075A687 /* UI_Strings.h */,
 			);
@@ -141,9 +157,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A578F7642326E73F00E55FC7 /* SchedulingPolicies.c in Sources */,
 				A5A87676232077280075A687 /* CommandLineParser.c in Sources */,
 				A5A8767F232077B30075A687 /* Scheduler.c in Sources */,
 				A5A8767C232077890075A687 /* Job.c in Sources */,
+				A578F7612326E6DA00E55FC7 /* JobQueue.c in Sources */,
 				A5A87679232077500075A687 /* Dispatcher.c in Sources */,
 				A5A8766E232072DC0075A687 /* main.c in Sources */,
 			);
@@ -269,6 +287,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A78B7SLGH2;
 				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_NO_COMMON_BLOCKS = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -279,6 +298,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A78B7SLGH2;
 				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_NO_COMMON_BLOCKS = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

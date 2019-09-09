@@ -8,5 +8,8 @@
 
 #ifndef CSUBATCH_DISPATCHER_H
 #define CSUBATCH_DISPATCHER_H
-void* dispatcher_main (void *arg);
+//#include "main.h"
+//#include "main.c"
+void* run_dispatcher(void *data);
+
 #endif //CSUBATCH_DISPATCHER_H
