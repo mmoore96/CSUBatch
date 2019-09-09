@@ -7,10 +7,19 @@
 //
 
 #include "Dispatcher.h"
-#include <stdlib.h>
-#include <pthread.h>
+#include "Scheduler.h"
+#include <stdio.h>
+//#include "main.c"
 
-void* dispatcher_main (void *arg){
-    printf("dispatcher worked!!!!\n");
+void* run_dispatcher(void *_data){
+    thread_data_t *data;
+    data = (thread_data_t*)_data;
+    int id = data->tid;
+
+    while (*data->active){
+        sleep(2);
+    }
+
+    printf("Terminating Dispatcher\n");
     return NULL;
 }

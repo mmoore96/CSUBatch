@@ -13,12 +13,8 @@
 #include <stdlib.h>
 #include "Dispatcher.h"
 #include "Scheduler.h"
+
 /* create thread argument struct for thr_func() */
-//pthread_mutex_t mutex;
-//typedef struct{
-//    int tid;
-//    bool* active;
-//}thread_data_t;
 
 int main(int argc, char **argv) {
     
