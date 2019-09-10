@@ -24,7 +24,7 @@
 #define quit_str "quit"
 
 //This macro defines the maximum character length of each user argument.
-#define ARGUMENT_SIZE 25
+#define ARGUMENT_SIZE 100
 
 #define AUTHORS "Tayler Cooper & George Moore"
 

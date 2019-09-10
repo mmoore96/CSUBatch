@@ -46,7 +46,6 @@
 		A5A8767B232077890075A687 /* Job.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Job.c; sourceTree = "<group>"; };
 		A5A8767D232077B30075A687 /* Scheduler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Scheduler.h; sourceTree = "<group>"; };
 		A5A8767E232077B30075A687 /* Scheduler.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Scheduler.c; sourceTree = "<group>"; };
-		A5A87680232077E90075A687 /* UI_Strings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UI_Strings.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,7 +94,6 @@
 				A578F7622326E73F00E55FC7 /* SchedulingPolicies.h */,
 				A578F7632326E73F00E55FC7 /* SchedulingPolicies.c */,
 				A5A8767E232077B30075A687 /* Scheduler.c */,
-				A5A87680232077E90075A687 /* UI_Strings.h */,
 			);
 			path = CSUBatch;
 			sourceTree = "<group>";

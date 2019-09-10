@@ -44,6 +44,7 @@ int start_ui(){
         command_name = strtok(in, " \n"); //Grab the first word
         for (int i = 0; i < 8; i ++){
             if (strcmp(command_name, string_array[i]) == 0){ //If command name matches a command
+                
                 (*commands[i])(); //Execute command
                 command_found = true;
                 break; //Stop loop if command found
@@ -66,14 +67,23 @@ int start_ui(){
 void run(){
     //Declare pointers to hold the job name, time and priority, which will be parsed from the users input
     char name_ptr[100];
+    memset((void*)name_ptr, 0, 100);
     char time_ptr[100];
+    memset((void*)time_ptr, 0, 100);
     char priority_ptr[100];
+    memset(priority_ptr, 0, 100);
 
     //Wrap into an array to pass into parse_input
     char *argv[3] = {name_ptr, time_ptr, priority_ptr};
 
     //Provide parse_input with our empty array of pointers, it will separate the arguments and put them in each of the arrays.
+
+    //strcpy(in, in[4:255]);
+
     if(parse_input(3, argv)){
+        printf("name: %s\n", argv[0]);
+        printf("Duration: %s\n", argv[1]);
+        printf("priority: %s\n", argv[2]);
         int time = (int)strtol(time_ptr, NULL, 0); //Convert time from string to int
         int priority = (int)strtol(priority_ptr, NULL, 0); //Convert priority from string to int
         Job* job = create_job(name_ptr, time, priority); //create job
@@ -119,26 +129,61 @@ void help(){
 //and 6 when used with test
 //Returns false if an error occurred and places error message in error_log global. Returns
 bool parse_input(int argc, char* argv[]){
+    int endj = 0;
     bool success = true;
-
-    //Copy each whitespace separated word into each argv index
-    for (int i = 0; i < argc; i ++){
-        strncpy(argv[i], strtok(NULL, " "), ARGUMENT_SIZE + 1);
-        if (strlen(argv[i]) > 100){
-            strcpy(error_log, "ERROR: Maximum argument size 100 exceeded. Arguments must be 100 characters or fewer");
-            success = false;
-            break;
-        }
-        if (argv[i] == NULL){
-            strcpy(error_log, "ERROR: Too few arguments. Try help.");
-            success = false;
-            break;
-        }
-    }
-    //If a word remains in the input string after the appropriate number of arguments have been taken, abort.
-    if (strtok(NULL, " ") != NULL){
-        strcpy(error_log, "ERROR: Too many arguments. Try help.");
-        success = false;
-    }
+    char* beginning = malloc(255);
+    memset(beginning,0,255);
+    strncpy(beginning, in + 4, 251);
+    char* end = beginning;
+    
+    for ( int i = 0; i < argc + 1; i ++){
+        if(beginning[0] == ' ' || beginning[0] == '\0'){
+            //TODO: fix this should not print on last iter.
+            printf("Wrong first argument\n");
+            return success == false;
+            
+        }else{
+            
+            for( int j = 0; j < 255; j++){
+                if(*(beginning + j) != ' ' && *(beginning + j) != '\n'){
+                    if (i == argc + 1){
+                        printf("BAD!\n");
+                    }
+                    }else{
+                    
+                        end = beginning + j - 1;
+                        endj = j;
+                        break;
+                        }
+            
+            }
+            strncpy(argv[i], beginning, endj);
+            beginning = end + 2;
+            printf("Beginning pointer %p\n", beginning);
+        }}
     return success;
 }
+            
+    //Copy each whitespace separated word into each argv index
+//    for (int i = 0; i < argc; i ++){
+//        printf("%s\n", in);
+//        strncpy(argv[i], strtok(NULL, " "), ARGUMENT_SIZE + 1);
+//        if (strlen(argv[i]) > 100){
+//            strcpy(error_log, "ERROR: Maximum argument size 100 exceeded. Arguments must be 100 characters or fewer");
+//            success = false;
+//            break;
+//        }
+//        if (argv[i] == NULL){
+//            strcpy(error_log, "ERROR: Too few arguments. Try help.");
+//            success = false;
+//            break;
+//        }
+//
+//    }
+//    //If a word remains in the input string after the appropriate number of arguments have been taken, abort.
+//    if (strtok(NULL, " ") != NULL){
+//        strcpy(error_log, "ERROR: Too many arguments. Try help.");
+//        success = false;
+//    }
+//    return success;
+//}
