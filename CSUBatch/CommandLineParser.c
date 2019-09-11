@@ -81,9 +81,9 @@ void run(){
     //strcpy(in, in[4:255]);
 
     if(parse_input(3, argv)){
-        printf("name: %s\n", argv[0]);
-        printf("Duration: %s\n", argv[1]);
-        printf("priority: %s\n", argv[2]);
+//        printf("name: %s\n", argv[0]);
+//        printf("Duration: %s\n", argv[1]);
+//        printf("priority: %s\n", argv[2]);
         int time = (int)strtol(time_ptr, NULL, 0); //Convert time from string to int
         int priority = (int)strtol(priority_ptr, NULL, 0); //Convert priority from string to int
         Job* job = create_job(name_ptr, time, priority); //create job
@@ -138,9 +138,14 @@ bool parse_input(int argc, char* argv[]){
     
     for ( int i = 0; i < argc + 1; i ++){
         if(beginning[0] == ' ' || beginning[0] == '\0'){
-            //TODO: fix this should not print on last iter.
-            printf("Wrong first argument\n");
-            return success == false;
+        
+            if(i <= 1){
+                printf("Wrong first argument\n");
+                return success == false;
+            }else{
+                break;
+            }
+            
             
         }else{
             
