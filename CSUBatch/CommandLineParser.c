@@ -130,6 +130,7 @@ void help(){
 //Returns false if an error occurred and places error message in error_log global. Returns
 bool parse_input(int argc, char* argv[]){
     int endj = 0;
+    int q = 0;
     bool success = true;
     char* beginning = malloc(255);
     memset(beginning,0,255);
@@ -139,8 +140,9 @@ bool parse_input(int argc, char* argv[]){
     for ( int i = 0; i < argc + 1; i ++){
         if(beginning[0] == ' ' || beginning[0] == '\0'){
         
-            if(i <= 1){
-                printf("Wrong first argument\n");
+            if(i <= 2){
+                //When we have too many arguments (This works)
+                printf("ERROR: Too few arguments. Try help.\n");
                 return success == false;
             }else{
                 break;
@@ -150,7 +152,9 @@ bool parse_input(int argc, char* argv[]){
         }else{
             
             for( int j = 0; j < 255; j++){
-                if(*(beginning + j) != ' ' && *(beginning + j) != '\n'){
+                if(*(beginning + j) != ' ' && *(beginning + j) != '\n'){ //Triggers when word is found
+                    //In testing this never gets called EVER!
+                    //TODO: Figure out if this is even needed at all
                     if (i == argc + 1){
                         printf("BAD!\n");
                     }
@@ -162,33 +166,30 @@ bool parse_input(int argc, char* argv[]){
                         }
             
             }
+            //&& beginning[0] != ' '
+            //^left over code that might be used^
+            //TODO: Need to tell user that they have entered in too many arguments (This does not work).
+            //This was implemented below.
+            //TODO: Remove after further testing of else statement below.
+            if( i == argc + 1 ){
+                printf("ERROR: Too many arguments. Try help\n");
+                success = false;
+                break;
+            }
+            
+            
+            if( q < 3 ){
             strncpy(argv[i], beginning, endj);
             beginning = end + 2;
+            q++;
+            //TODO: This print statement will be removed once testing is over
             printf("Beginning pointer %p\n", beginning);
+                
+            }else{
+                //Prints message when we have too many arguments (This works).
+                printf("You have entered in an extraneous argument (which could be a space), this was disregarded.\n");
+            }
         }}
     return success;
 }
             
-    //Copy each whitespace separated word into each argv index
-//    for (int i = 0; i < argc; i ++){
-//        printf("%s\n", in);
-//        strncpy(argv[i], strtok(NULL, " "), ARGUMENT_SIZE + 1);
-//        if (strlen(argv[i]) > 100){
-//            strcpy(error_log, "ERROR: Maximum argument size 100 exceeded. Arguments must be 100 characters or fewer");
-//            success = false;
-//            break;
-//        }
-//        if (argv[i] == NULL){
-//            strcpy(error_log, "ERROR: Too few arguments. Try help.");
-//            success = false;
-//            break;
-//        }
-//
-//    }
-//    //If a word remains in the input string after the appropriate number of arguments have been taken, abort.
-//    if (strtok(NULL, " ") != NULL){
-//        strcpy(error_log, "ERROR: Too many arguments. Try help.");
-//        success = false;
-//    }
-//    return success;
-//}
