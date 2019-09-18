@@ -7,7 +7,8 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-pthread_mutex_t mutex;
+pthread_mutex_t queue_mutex;
+pthread_cond_t queue_cond;
 
 typedef struct{
     int tid;

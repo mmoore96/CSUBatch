@@ -16,7 +16,7 @@ int compare_priority(Job j1, Job j2){
 }
 
 int compare_duration(Job j1, Job j2){
-    if (j1.duration > j2.duration){
+    if (j1.duration < j2.duration){
         return 1;
     }else if (j1.duration == j2.duration){
         return 0;

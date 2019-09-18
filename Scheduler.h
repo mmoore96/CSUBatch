@@ -9,18 +9,20 @@
 #include "JobQueue.h"
 #include "unistd.h"
 #include "SchedulingPolicies.h"
-#define fcfs_enum 0
-#define sjf_num 1
-#define priority_num 2
 
+//An array for holding job pointers waiting to be added to the queue
+Job* job_buffer[100];
 
+//The function below is used to compare two jobs based on any given policy and is used to sort the queue.
+//It should be set to point to one of the functions in SchedulingPolicies.h
 int (*schedule_comparator)(Job, Job);
 void* run_scheduler(void *data);
 void post(Job* job);
 void set_priority_scheduling();
 void set_fcfs_scheduling();
 void set_sjf_scheduling();
-void insert(Job* job, Node* q);
+void insert(Job* job);
+void insert_aux(Job* job, Node* q);
 
 
 #endif //CSUBATCH_SCHEDULER_H

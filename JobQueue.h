@@ -10,8 +10,7 @@
 #include "Errors.h"
 #include "Dispatcher.h"
 
-//Wish I could typedef this to remove need to prefix ever JobQueue delcaration with struct,
-//But doing so causes issues with the 'next' member delcaration
+//The job queue will be a linked list comprised of the following Node struct.
 typedef struct Node Node;
 struct Node{
     Job *job;
@@ -19,16 +18,16 @@ struct Node{
 };
 //This is a global variable for holding the job queue.
 //Notice the 2 leading underscores indicating it should be private. It is not advised to touch this variable
-//outside of JobQueue.c/h. To interact with the job queue from CommandLineParser or any other module, call create_job_queue
-//with a JobQueue pointer. The global job queue will be placed in the pointer.
+//outside of JobQueue.c/h. To interact with the job queue from CommandLineParser or any other module, call create_job_queue,
+//and use the following functions to interact.
+//NOTE: Even when no jobs are queue, __job_queue will point to a valid Node whose 'next' and 'job' members are null.
+//As a result, when adding a job to an EMPTY queue, it is not necessary to create a new node, because job_queue will always have one,
+//it is only necessary to set the 'job' member of the existing __job_queue node to the new job.
 Node* __job_queue;
 
-//The following functions operate on JobQueue types.
-//Note that for functions intended to get a job object, the last parameter is the pointer
-//pointing to the job being received.
-//Functions that return int return and exit code; and exit code of non-zero indicates an error occurred.
+//The following functions operate on Node types.
 int create_job_queue();
-Node* get_queue();
+Node** get_queue();
 Job* get_job(int index);
 Job* __get_job_aux(int index, Node* q);
 Node* get_node(int index);

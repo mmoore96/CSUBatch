@@ -10,7 +10,8 @@ int main(int argc, char **argv) {
     int NUM_THREADS = 2;
     pthread_t thr[NUM_THREADS];
     int i;
-    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&queue_mutex, NULL);
+    pthread_cond_init(&queue_cond, NULL);
     /* create a thread_data_t argument array */
     bool active = true;
     thread_data_t thr_data[NUM_THREADS];

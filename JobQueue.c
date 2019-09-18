@@ -22,9 +22,10 @@ Job* get_first(){
     }
 }
 
-//Returns a reference to the beginning of the job queue
-Node* get_queue(){
-    return __job_queue;
+//Returns a pointer to the pointer to the job_queue.
+//This is used to change where the pointer points when the next node in the queue should be changed.
+Node** get_queue(){
+    return &__job_queue;
 }
 
 //Places the address of the job at index 'index' into 'job'
