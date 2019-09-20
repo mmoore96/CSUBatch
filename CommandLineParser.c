@@ -1,5 +1,8 @@
 //
-// Created by trcoo on 9/3/19.
+//  CommandLineParser.c
+//  CSUBatch
+//
+//  Created by Tayler Cooper and George Moore
 //
 
 #include "CommandLineParser.h"
@@ -37,9 +40,9 @@ int start_ui(){
         printf(">");
         bool command_found = false; //We assume a command will not be found before checking.
         fgets(in, 255, stdin);  //Grab user input, max of 255 characters. TODO: Add input validation for the input
-        command_name = strtok(in, " \n"); //Grab the first word
         for (int i = 0; i < 8; i ++){
-            if (strcmp(command_name, string_array[i]) == 0){ //If command name matches a command
+            if (strncmp(in, string_array[i], get_string_length(in)) == 0){ //If command name matches a command
+
                 (*commands[i])(); //Execute command
                 command_found = true;
                 break; //Stop loop if command found
@@ -62,14 +65,23 @@ int start_ui(){
 void run(){
     //Declare pointers to hold the job name, time and priority, which will be parsed from the users input
     char name_ptr[100];
+    memset((void*)name_ptr, 0, 100);
     char time_ptr[100];
+    memset((void*)time_ptr, 0, 100);
     char priority_ptr[100];
+    memset(priority_ptr, 0, 100);
 
     //Wrap into an array to pass into parse_input
     char *argv[3] = {name_ptr, time_ptr, priority_ptr};
 
     //Provide parse_input with our empty array of pointers, it will separate the arguments and put them in each of the arrays.
+
+    //strcpy(in, in[4:255]);
+
     if(parse_input(3, argv)){
+//        printf("name: %s\n", argv[0]);
+//        printf("Duration: %s\n", argv[1]);
+//        printf("priority: %s\n", argv[2]);
         int time = (int)strtol(time_ptr, NULL, 0); //Convert time from string to int
         int priority = (int)strtol(priority_ptr, NULL, 0); //Convert priority from string to int
         Job* job = create_job(name_ptr, time, priority); //create job
@@ -112,29 +124,72 @@ void help(){
 
 //Split the input strings into discrete arguments using strtok
 //argc is the number of arguments expected form the string. Will be 3 when used with run
-//and 6 when used with test
+//and 6 when used with test.c
 //Returns false if an error occurred and places error message in error_log global. Returns
 bool parse_input(int argc, char* argv[]){
-    bool success = true;
+    int word_size = -1;
+    char* word_beginning = malloc(255);
+    memset(word_beginning,0,255);
+    strncpy(word_beginning, in + 4, 251);
+    char* word_end = word_beginning;
 
-    //Copy each whitespace separated word into each argv index
-    for (int i = 0; i < argc; i ++){
-        strncpy(argv[i], strtok(NULL, " "), ARGUMENT_SIZE + 1);
-        if (strlen(argv[i]) > 100){
-            strcpy(error_log, "ERROR: Maximum argument size 100 exceeded. Arguments must be 100 characters or fewer");
-            success = false;
-            break;
+    for ( int i = 0; i < argc + 1; i ++){
+        //For each word in input string
+        if (is_num(word_beginning[0]) || is_alpha(word_beginning[0])){
+            //Entered if starting character is numeric or alphabetical
+            if (i == argc){
+                printf("ERROR: Too many arguments. Try help.\n");
+                return false;
+            }
+            for( int j = 0; j < 255; j++) {
+                //For each character in word
+                if (*(word_beginning + j) == ' ' || *(word_beginning + j) == '\n') {
+                    //Entered if we reach a space or newline after the end of a word
+                    word_end = word_beginning + j - 1;
+                    word_size = j;
+                    break;
+                }
+            }
+        }else{
+            if(i < argc){
+                printf("ERROR: Too few arguments. Try help.\n");
+                return false;
+            }else{
+                break;
+            }
         }
-        if (argv[i] == NULL){
-            strcpy(error_log, "ERROR: Too few arguments. Try help.");
-            success = false;
-            break;
+
+        if( i < argc ){
+            strncpy(argv[i], word_beginning, word_size); //Copy the range of the word to the arguments pointer
+            word_beginning = word_end + 2; //Update the pointer to the beginning of the next word.
         }
     }
-    //If a word remains in the input string after the appropriate number of arguments have been taken, abort.
-    if (strtok(NULL, " ") != NULL){
-        strcpy(error_log, "ERROR: Too many arguments. Try help.");
-        success = false;
+    return true;
+}
+
+int get_string_length(const char string[]){
+    //If the ascii of the first character in string is less than a or more than z, it is not a valid command.
+    if ((int)string[0] < (int)'a' || (int)string[0] > (int)'z'){
+        return 0;
+    }else{
+        return 1 + get_string_length(string + 1);
     }
-    return success;
+}
+
+int is_num(char c){
+    int char_code = (int)c;
+    if (char_code >= 48 && char_code <= 57){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
+int is_alpha(char c){
+    int char_code = (int)c;
+    if (char_code >= 97 && char_code <= 122){
+        return 1;
+    }else{
+        return 0;
+    }
 }
