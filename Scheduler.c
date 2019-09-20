@@ -23,32 +23,33 @@ void* run_scheduler(void *_data){
 }
 
 void post(Job* job){
-    insert(job);
+    if (job_queue_length() == 0){
+        (*get_queue())->job = job;
+    }else{
+        Node* new_node = malloc(sizeof(Node));
+        new_node->next = NULL;
+        new_node->job = job;
+        insert(new_node);
+    }
 }
 
 void set_priority_scheduling(){
     schedule_comparator = &compare_priority;
+    sort();
 }
 
 void set_fcfs_scheduling(){
     schedule_comparator = &compare_age;
+    sort();
 }
 
 void set_sjf_scheduling(){
     schedule_comparator = &compare_duration;
+    sort();
 }
 
-void insert(Job* job){
-    if (job_queue_length() == 0){
-        //If the job queue is empty, just set the job member of the queue to the given job.
-        //When the job queue is empty, it will consist of a single Node with a NULL next and job field.
-        (*get_queue())->job = job;
-    } else {
-        Node* new_node = malloc(sizeof(Node));
-        new_node->next = NULL;
-        new_node->job = job;
-        insert_aux(new_node, get_queue());
-    }
+void insert(Node* new_node){
+    insert_aux(new_node, get_queue());
 }
 
 //A recursive helper function for insert.
@@ -80,4 +81,20 @@ void insert_aux(Node* new_node, Node** current_node){
             *get_queue() = new_node;
         }
     }
+}
+
+void sort(){
+    int length = job_queue_length();
+    Node* nodes[length];
+    for (int i = 0; i < length; i ++){
+        nodes[i] = *get_queue() + i;
+    }
+    (*get_queue()) = ;
+    for (int i = 0; i < length; i ++){
+        insert(nodes[i]);
+    }
+}
+
+void swap_jobs(Node* n1, Node* n2){
+
 }

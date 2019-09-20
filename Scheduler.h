@@ -21,8 +21,9 @@ void post(Job* job);
 void set_priority_scheduling();
 void set_fcfs_scheduling();
 void set_sjf_scheduling();
-void insert(Job* job);
+void insert(Node* job);
 void insert_aux(Node* new_node, Node** current_node);
+void sort();
 
 
 #endif //CSUBATCH_SCHEDULER_H

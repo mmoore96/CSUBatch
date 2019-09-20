@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
     /* create threads for scheduler and dispatcher*/
     pthread_create(&thr[0], NULL, run_scheduler, &thr_data[0]);
     pthread_create(&thr[1], NULL, run_dispatcher, &thr_data[1]);
+    setbuf(stdout, 0);
     start_ui();
     printf("Waiting for threads to join...\n");
     active = false;
