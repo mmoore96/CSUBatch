@@ -26,9 +26,9 @@ int compare_duration(Job j1, Job j2){
 }
 
 int compare_age(Job j1, Job j2){
-    if (j1.age > j2.age){
+    if (j1.creation_time < j2.creation_time){
         return 1;
-    } else if (j1.age == j2.age){
+    } else if (j1.creation_time == j2.creation_time){
         return 0;
     } else{
         return -1;

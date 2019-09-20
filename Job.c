@@ -12,7 +12,7 @@ Job* create_job(char* name, int duration, int priority){
     strncpy(job->name, name, ARGUMENT_SIZE);
     job->duration = duration;
     job->priority = priority;
-    job->age = time(0);
+    job->creation_time = time(0);
     return job;
 }
 
@@ -25,5 +25,5 @@ void free_job(Job* job){
 
 //Formats a string containing 'job's information, and places it in 'string'
 void job_string(Job* job, char* string){
-    sprintf(string, "%s\t%d\t%d\t%ld", job->name, job->duration, job->priority, job->age);
+    sprintf(string, "%s\t%d\t%d\t%ld", job->name, job->duration, job->priority, job->creation_time);
 }

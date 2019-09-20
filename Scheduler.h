@@ -22,7 +22,7 @@ void set_priority_scheduling();
 void set_fcfs_scheduling();
 void set_sjf_scheduling();
 void insert(Job* job);
-void insert_aux(Job* job, Node* q);
+void insert_aux(Node* new_node, Node** current_node);
 
 
 #endif //CSUBATCH_SCHEDULER_H

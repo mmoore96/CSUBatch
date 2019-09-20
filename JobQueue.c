@@ -140,10 +140,10 @@ int __job_queue_length_aux(int count, Node* q){
 
 void print_job_queue(){
     Job job;
-    printf("Index\tName    \tTime\tPriority\tAge\n");
+    printf("Index\tName    \tTime\tPriority\tAge (seconds)\n");
     for (int i = 0; i < job_queue_length(); i++)
     {
         job = *get_job(i);
-        printf("%-8d%-12s%-8d%-12d%-ld\n", i, job.name, job.duration, job.priority, job.age);
+        printf("%-8d%-12s%-8d%-12d%-ld\n", i, job.name, job.duration, job.priority, time(0) - job.creation_time);
     }
 }
