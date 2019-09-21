@@ -65,16 +65,17 @@ Node* get_last_node(){
     return get_node(job_queue_length()-1);
 }
 
-//Removes oldest Job from queue and returns it
+//Removes last Job from queue and returns it
 Job dequeue(){
+    Node* next_node = *get_queue(); //This is the node from which the job will be extracted, then the node will be freed
+    Job next_job = *next_node->job; //This is the job to be removed and returned
     if (job_queue_length() == 1){
-        Job next_job = *(*__job_queue)->job;
-        free((*__job_queue)->job);
+        free(next_node->job);
+        free(next_node);
+        *get_queue() = NULL;
         return next_job;
     }else{
-        Node* next_node = *__job_queue;
-        Job next_job = *next_node->job;
-        __job_queue = &(*__job_queue)->next;
+        *get_queue() = (*get_queue())->next;
         free(next_node->job);
         free(next_node);
         return next_job;

@@ -9,10 +9,27 @@
 void* run_dispatcher(void *_data){
     thread_data_t *data;
     data = (thread_data_t*)_data;
-    int id = data->tid;
+    //Define an array of two strings. The first string holds the execution time of the job, which will be passed
+    //to batch_job as a program argument. the second argument is null, because execv requires that the parameter
+    //array be null terminated.
+    char job_duration[10];
+    char* args[2];
+    args[0] =  job_duration;
+    args[1] = NULL;
 
     while (*data->active){
-        sleep(2);
+        pthread_mutex_lock(&queue_mutex);
+        if (job_queue_length() > 0){
+            Job job = dequeue();
+            pthread_mutex_unlock(&queue_mutex);
+            sprintf(args[0], "%d", job.duration);
+            //TODO: have this thread wait until the process called by execv finishes
+            execv("batch_job", args);
+        }else{
+            pthread_mutex_unlock(&queue_mutex);
+            //TODO: replace sleep with pthread_cond_wait()
+            sleep(1); //Wait a second if no jobs are available to improve performance.
+        }
     }
 
     printf("Terminating Dispatcher\n");

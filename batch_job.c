@@ -6,11 +6,11 @@
 //Will wait for the amount of time specified as command line parameter in seconds
 //Default time is 1 second
 int main(int argc, char* argv[]){
-	printf("Help");
 	if (argc == 2){
-		sleep(atoi(argv[1]));
+	    int t = atoi(argv[1]);
+		sleep(t);
 	}else{
-		sleep(1000);
+		sleep(1);
 	}
 	return 0;
 }

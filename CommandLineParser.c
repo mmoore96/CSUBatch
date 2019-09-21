@@ -33,8 +33,6 @@ char error_log[255] = "";
 //and begins looping, asking for input and carrying out tasks until 'quit' is entered and returns from the loop.
 
 int start_ui(){
-    create_job_queue();
-    char* command_name; //The first word of the user input will be interpreted as the command to be called.
     printf(prompt, AUTHORS);    //Print welcome prompt
     while (active){
         printf(">");
@@ -70,18 +68,10 @@ void run(){
     memset((void*)time_ptr, 0, 100);
     char priority_ptr[100];
     memset(priority_ptr, 0, 100);
-
     //Wrap into an array to pass into parse_input
     char *argv[3] = {name_ptr, time_ptr, priority_ptr};
 
-    //Provide parse_input with our empty array of pointers, it will separate the arguments and put them in each of the arrays.
-
-    //strcpy(in, in[4:255]);
-
     if(parse_input(3, argv)){
-//        printf("name: %s\n", argv[0]);
-//        printf("Duration: %s\n", argv[1]);
-//        printf("priority: %s\n", argv[2]);
         int time = (int)strtol(time_ptr, NULL, 0); //Convert time from string to int
         int priority = (int)strtol(priority_ptr, NULL, 0); //Convert priority from string to int
         Job* job = create_job(name_ptr, time, priority); //create job
@@ -89,7 +79,6 @@ void run(){
     }
 }
 
-//TODO: Check for buffer overflow event
 //Prints job information
 void list(){
     print_job_queue();
