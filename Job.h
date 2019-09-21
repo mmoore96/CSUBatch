@@ -23,7 +23,4 @@ Job* create_job(char* name, int time, int priority);
 //Frees memory after usage
 void free_job(Job* job);
 
-void job_string(Job* job, char* string);
-
-
 #endif //CSUBATCH_JOB_H

@@ -7,16 +7,14 @@
 #include <stdio.h>
 
 int create_job_queue(){
-    __job_queue = malloc(sizeof(Node));
-    __job_queue->next = NULL;
-    __job_queue->job = NULL;
+    __job_queue = malloc(sizeof(Node*));
     return 0;
 }
 
 
 Job* get_first(){
-    if (__job_queue->job){
-        return __job_queue->job;
+    if ((*__job_queue)->job){
+        return (*__job_queue)->job;
     }else{
         return NULL;
     }
@@ -25,13 +23,13 @@ Job* get_first(){
 //Returns a pointer to the pointer to the job_queue.
 //This is used to change where the pointer points when the next node in the queue should be changed.
 Node** get_queue(){
-    return &__job_queue;
+    return __job_queue;
 }
 
 //Places the address of the job at index 'index' into 'job'
 //Returns 0 if successful
 Job* get_job(int index){
-    return __get_job_aux(index, __job_queue);
+    return __get_job_aux(index, *__job_queue);
 }
 
 Job* __get_job_aux(int index, Node* n){
@@ -45,7 +43,7 @@ Job* __get_job_aux(int index, Node* n){
 }
 
 Node* get_node(int index){
-    return __get_node_aux(index, __job_queue);
+    return __get_node_aux(index, *__job_queue);
 }
 
 Node* __get_node_aux(int index, Node* q){
@@ -70,14 +68,13 @@ Node* get_last_node(){
 //Removes oldest Job from queue and returns it
 Job dequeue(){
     if (job_queue_length() == 1){
-        Job next_job = *__job_queue->job;
-        free(__job_queue->job);
-        __job_queue->job = NULL;
+        Job next_job = *(*__job_queue)->job;
+        free((*__job_queue)->job);
         return next_job;
     }else{
-        Node* next_node = __job_queue;
+        Node* next_node = *__job_queue;
         Job next_job = *next_node->job;
-        __job_queue = __job_queue->next;
+        __job_queue = &(*__job_queue)->next;
         free(next_node->job);
         free(next_node);
         return next_job;
@@ -88,9 +85,10 @@ Job dequeue(){
 //Returns exit status; 0 if success
 //To add a new node, we set the new node's 'next' to be the current first node, and then set our
 //reference to the first node to be the new node.
+//TODO: Consider removing this function
 int enqueue(Job *job){
     if (job_queue_length(__job_queue) == 0){
-        __job_queue->job = job;
+        (*__job_queue)->job = job;
         return 0;
     }else {
         Node* new_node = malloc(sizeof(Node));  //Allocate memory for new node
@@ -107,7 +105,22 @@ int enqueue(Job *job){
 }
 
 int free_job_queue(){
-    return __free_job_queue_aux(__job_queue);
+    return __free_job_queue_aux(*__job_queue);
+}
+
+//This function sets the 'next' pointer for every node to NULL. This makes it easier to sort the job queue
+//Before this function is called, all Node*'s should be copied to an array, then the nodes have their 'next's cleared,
+//then you can use insert(Node*) for each Node* to reorder the queue
+void clear_node_links(){
+    __clear_node_links_aux(*get_queue());
+    (*get_queue()) = NULL;
+}
+
+void __clear_node_links_aux(Node* n){
+    if (n != NULL){
+        __clear_node_links_aux(n->next);
+        n->next = NULL;
+    }
 }
 
 int __free_job_queue_aux(Node* n){
@@ -123,15 +136,15 @@ int __free_job_queue_aux(Node* n){
 }
 
 int job_queue_length(){
-    if (__job_queue == NULL || __job_queue->job == NULL){
+    if (*__job_queue == NULL){
         return 0;
     }else{
-        return __job_queue_length_aux(1, __job_queue);
+        return __job_queue_length_aux(1, (*__job_queue)->next);
     }
 }
 
 int __job_queue_length_aux(int count, Node* q){
-    if (q->next == NULL){
+    if (q == NULL){
         return count;
     } else{
         return __job_queue_length_aux(count + 1, q->next);

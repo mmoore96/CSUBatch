@@ -96,15 +96,15 @@ void list(){
 }
 
 void set_fcfs(){
-    set_fcfs_scheduling();
+    set_scheduling(0);
 }
 
 void set_sjf(){
-    set_sjf_scheduling();
+    set_scheduling(1);
 }
 
 void set_priority(){
-    set_priority_scheduling();
+    set_scheduling(2);
 }
 
 void test(){

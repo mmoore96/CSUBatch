@@ -20,10 +20,9 @@ struct Node{
 //Notice the 2 leading underscores indicating it should be private. It is not advised to touch this variable
 //outside of JobQueue.c/h. To interact with the job queue from CommandLineParser or any other module, call create_job_queue,
 //and use the following functions to interact.
-//NOTE: Even when no jobs are queue, __job_queue will point to a valid Node whose 'next' and 'job' members are null.
-//As a result, when adding a job to an EMPTY queue, it is not necessary to create a new node, because job_queue will always have one,
-//it is only necessary to set the 'job' member of the existing __job_queue node to the new job.
-Node* __job_queue;
+//It is a double pointer so that when necessary, the pointer to the very first element can be changed.
+//It's basically an array of Node*'s, except they are not in contiguous memory.
+Node** __job_queue;
 
 //The following functions operate on Node types.
 int create_job_queue();
@@ -34,9 +33,10 @@ Node* get_node(int index);
 Node* __get_node_aux(int index, Node* q);
 Job* get_last_job();
 Job dequeue();
+void clear_node_links();
+void __clear_node_links_aux(Node* n);
 int free_job_queue();
 int __free_job_queue_aux(Node* q);
-int enqueue(Job* job);
 int job_queue_length();
 int __job_queue_length_aux(int count, Node* q);
 void print_job_queue();

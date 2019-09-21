@@ -13,7 +13,6 @@ void* run_scheduler(void *_data){
     data = (thread_data_t*)_data;
     //Set the default policy to first come first serve by setting the comparator to SchedulingPolicies::compare_age
     schedule_comparator = &compare_age;
-    int id = data->tid;
 
     while (*data->active){
 
@@ -23,33 +22,32 @@ void* run_scheduler(void *_data){
 }
 
 void post(Job* job){
-    if (job_queue_length() == 0){
-        (*get_queue())->job = job;
-    }else{
         Node* new_node = malloc(sizeof(Node));
         new_node->next = NULL;
         new_node->job = job;
         insert(new_node);
+}
+
+//Used to set the new policy, where fcfs, sjf, and priority are mapped to integers 0, 1, and 2 respectively.
+void set_scheduling(int p){
+    switch (p){
+        case 0: schedule_comparator = &compare_age; break;
+        case 1: schedule_comparator = &compare_duration; break;
+        case 2: schedule_comparator = &compare_priority; break;
+        default: printf("ERROR: SET_SCHEDULING METHOD GIVEN UNKNOWN VALUE %d!\n", p);
     }
+    sort();
+    printf("Queue has been reordered.\n");
+    print_job_queue();
 }
 
-void set_priority_scheduling(){
-    schedule_comparator = &compare_priority;
-    sort();
-}
-
-void set_fcfs_scheduling(){
-    schedule_comparator = &compare_age;
-    sort();
-}
-
-void set_sjf_scheduling(){
-    schedule_comparator = &compare_duration;
-    sort();
-}
 
 void insert(Node* new_node){
-    insert_aux(new_node, get_queue());
+    if (job_queue_length() == 0){
+        *get_queue() = new_node;
+    }else{
+        insert_aux(new_node, get_queue());
+    }
 }
 
 //A recursive helper function for insert.
@@ -85,16 +83,15 @@ void insert_aux(Node* new_node, Node** current_node){
 
 void sort(){
     int length = job_queue_length();
+    //Create a copy of all Node*'s. Otherwise, it will be impossible to retrieve the nodes after their pointers are cleared with clear_node_linke_length();
     Node* nodes[length];
     for (int i = 0; i < length; i ++){
-        nodes[i] = *get_queue() + i;
+        nodes[i] = get_node(i);
     }
-    (*get_queue()) = ;
+    //Set all 'next' members of each Node to NULL, so that they can be properly reset.
+    clear_node_links();
+    //Insert them one by one. insert() automatically places them in the correct order.
     for (int i = 0; i < length; i ++){
         insert(nodes[i]);
     }
-}
-
-void swap_jobs(Node* n1, Node* n2){
-
 }
