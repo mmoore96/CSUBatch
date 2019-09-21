@@ -24,7 +24,8 @@ void* run_dispatcher(void *_data){
             pthread_mutex_unlock(&queue_mutex);
             sprintf(args[0], "%d", job.duration);
             //TODO: have this thread wait until the process called by execv finishes
-            execv("batch_job", args);
+            int x = execv("batch_job", args);
+            printf("Execv returns code: %d\n", x);
         }else{
             pthread_mutex_unlock(&queue_mutex);
             //TODO: replace sleep with pthread_cond_wait()
