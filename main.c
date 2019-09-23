@@ -9,8 +9,8 @@
 //TODO: As a result, a function should be written that locks the mutex and then updates the variable at once. Same for unlocked
 
 int main(int argc, char **argv) {
-    UNOWNED = 0;
-    MAIN = pthread_self();
+    UNOWNED = 0; //Immediately before unlocking a mutex, set lock_owner to UNOWNED to indicate the mutex is unowned. Here I am setting UNOWNED to 0 because setting it to 0 in the header causes a compile error, so I am assigning it here during runtime.
+    MAIN = pthread_self(); //Largely for debugging, this saves the thread ID of the main thread to global variable MAIN
     int NUM_THREADS = 2;
     pthread_t thr[NUM_THREADS];
     int i;
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     pthread_create(&thr[0], NULL, run_scheduler, &thr_data[0]);
     pthread_create(&thr[1], NULL, run_dispatcher, &thr_data[1]);
 
-    setbuf(stdout, 0);
+    setbuf(stdout, 0); // For windows development. Debug mode will not print strings without this line
     start_ui();
     printf("Waiting for threads to join...\n");
     active = false;
