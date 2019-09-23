@@ -13,7 +13,8 @@ typedef struct{
     char* name;
     int priority;
     int duration;
-    time_t creation_time;
+    time_t age;
+    char* arrival_time;
 
 }Job;
 

@@ -3,7 +3,7 @@
 //
 
 #include "JobQueue.h"
-
+#include "Scheduler.h"
 #include <stdio.h>
 
 int create_job_queue(){
@@ -11,14 +11,6 @@ int create_job_queue(){
     return 0;
 }
 
-
-Job* get_first(){
-    if ((*__job_queue)->job){
-        return (*__job_queue)->job;
-    }else{
-        return NULL;
-    }
-}
 
 //Returns a pointer to the pointer to the job_queue.
 //This is used to change where the pointer points when the next node in the queue should be changed.
@@ -105,9 +97,6 @@ int enqueue(Job *job){
     }
 }
 
-int free_job_queue(){
-    return __free_job_queue_aux(*__job_queue);
-}
 
 //This function sets the 'next' pointer for every node to NULL. This makes it easier to sort the job queue
 //Before this function is called, all Node*'s should be copied to an array, then the nodes have their 'next's cleared,
@@ -124,7 +113,12 @@ void __clear_node_links_aux(Node* n){
     }
 }
 
-int __free_job_queue_aux(Node* n){
+void free_job_queue(){
+    __free_job_queue_aux(*__job_queue);
+    free(__job_queue);
+}
+
+void __free_job_queue_aux(Node* n){
     if (n != NULL) {
         __free_job_queue_aux(n->next);
         printf("NODE POINTER %p FREED\n", (void*) n);
@@ -133,11 +127,17 @@ int __free_job_queue_aux(Node* n){
         free_job(n->job);
         free(n);
     }
-    return 0;
 }
 
 int job_queue_length(){
+    if (lock_owner != pthread_self()){
+        // Lock the mutex IF AND ONLY IF the current thread does not already have the lock
+        pthread_mutex_lock(&queue_mutex);
+        lock_owner = pthread_self();
+    }
     if (*__job_queue == NULL){
+        lock_owner = UNOWNED;
+        pthread_mutex_unlock(&queue_mutex);
         return 0;
     }else{
         return __job_queue_length_aux(1, (*__job_queue)->next);
@@ -154,10 +154,20 @@ int __job_queue_length_aux(int count, Node* q){
 
 void print_job_queue(){
     Job job;
-    printf("Index\tName    \tTime\tPriority\tAge (seconds)\n");
-    for (int i = 0; i < job_queue_length(); i++)
+    int length = job_queue_length();
+    char policy[6];
+    get_policy(policy);
+    printf("Total number of jobs in the queue: %d\n", length + ((current_job != NULL) ? 1 : 0));
+    printf("Scheduling Policy: %s\n", policy);
+    printf("Name    \tCPU_Time\tPriority\tArrival\tProgress\n");
+    if (current_job != NULL){
+        job = *current_job;
+        printf("%-12s%-12d%-12d%s\tRunning\n", job.name, job.duration, job.priority, job.arrival_time);
+    }
+    for (int i = 0; i < length; i++)
     {
         job = *get_job(i);
-        printf("%-8d%-12s%-8d%-12d%-ld\n", i, job.name, job.duration, job.priority, time(0) - job.creation_time);
+        printf("%-12s%-12d%-12d%s\n", job.name, job.duration, job.priority, job.arrival_time);
     }
 }
+

@@ -9,6 +9,7 @@
 
 
 void* run_scheduler(void *_data){
+    SCHEDULER = pthread_self();
     thread_data_t *data;
     data = (thread_data_t*)_data;
     sort_flag = false;
@@ -22,7 +23,9 @@ void* run_scheduler(void *_data){
         bool job_found = false;
         if (sort_flag){
             pthread_mutex_lock(&queue_mutex);
+            lock_owner = SCHEDULER;
             sort();
+            lock_owner = UNOWNED;
             pthread_mutex_unlock(&queue_mutex);
             sort_flag = false;
         }
@@ -34,14 +37,15 @@ void* run_scheduler(void *_data){
                 new_node->next = NULL;
                 job_buffer[i] = NULL;
                 pthread_mutex_lock(&queue_mutex);
+                lock_owner = SCHEDULER;
                 insert(new_node);
+                lock_owner = UNOWNED;
                 pthread_mutex_unlock(&queue_mutex);
             }
         }
         //If no job was found in the entire buffer, wait a second before checking again to improve performance.
         if (!job_found){
-            //TODO: instead of using sleep, use pthread_cond_wait to wait for the main thread to produce a new job
-            sleep(1);
+            //TODO: Use pthread_cond_wait here to wait for the main thread to produce a new job instead of constantly checking for a new job
         }
     }
     printf("Terminating Scheduler\n");
@@ -74,7 +78,6 @@ void set_scheduling(int p){
         case 2: schedule_comparator = &compare_priority; break;
         default: printf("ERROR: SET_SCHEDULING METHOD GIVEN UNKNOWN VALUE %d!\n", p);
     }
-
     sort();
     printf("Queue has been reordered.\n");
     print_job_queue();
@@ -106,6 +109,7 @@ void insert_aux(Node* new_node, Node** current_node){
             //Entering this block indicates that the new job has a greater or equal priority than the q element AFTER the current q element we're comparing against.
             //This branch is only reached if the new job has a lower priority than the current node job AND a greater priority than the next node's job.
             //As a result, we initialize a node for the job, and place it between the current node and the next node.
+
             new_node->next = next_node;
             (*current_node)->next = new_node;
         }
@@ -135,7 +139,11 @@ void sort(){
     }
 }
 
-//This function should only be called by the commandlineparser in the main thread.
-void queue_sort(){
-    sort_flag = true;
+void get_policy(char policy[]){
+    if (schedule_comparator == compare_age)
+        strcpy(policy, "FCFS");
+    else if (schedule_comparator == compare_priority)
+        strcpy(policy, "Priority");
+    else if (schedule_comparator == compare_duration)
+        strcpy(policy, "sjf");
 }

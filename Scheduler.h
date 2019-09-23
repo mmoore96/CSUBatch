@@ -27,7 +27,7 @@ void set_scheduling();
 void insert(Node* job);
 void insert_aux(Node* new_node, Node** current_node);
 void sort();
-void queue_sort();
+void get_policy(char policy[]);
 
 
 #endif //CSUBATCH_SCHEDULER_H
