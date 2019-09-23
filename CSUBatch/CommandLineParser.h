@@ -2,8 +2,9 @@
 //  CommandLineParser.h
 //  CSUBatch
 //
-//  Created by Michael Moore on 9/4/19.
+//  Created by George Moore and Tayler Cooper on 9/4/19.
 //  Copyright © 2019 George Moore. All rights reserved.
+//  Copyright © 2019 Tayler Cooper. All rights reserved.
 //
 #ifndef CSUBATCH_COMMANDLINEPARSER_H
 #define CSUBATCH_COMMANDLINEPARSER_H
@@ -25,6 +26,9 @@ void test();
 void quit();
 void help();
 bool parse_input(int argc, char* argv[]);
+int get_string_length(const char string[]);
+int is_num(char c);
+int is_alpha(char c);
 typedef void (*command_array)();
 
 

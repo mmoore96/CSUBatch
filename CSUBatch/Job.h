@@ -2,8 +2,9 @@
 //  Job.h
 //  CSUBatch
 //
-//  Created by Michael Moore on 9/4/19.
+//  Created by George Moore and Tayler Cooper on 9/4/19.
 //  Copyright © 2019 George Moore. All rights reserved.
+//  Copyright © 2019 Tayler Cooper. All rights reserved.
 //
 
 #ifndef CSUBATCH_JOB_H
@@ -18,6 +19,7 @@ typedef struct{
     int priority;
     int duration;
     time_t age;
+    char* arrival_time;
 
 }Job;
 
@@ -26,8 +28,5 @@ Job* create_job(char* name, int time, int priority);
 
 //Frees memory after usage
 void free_job(Job* job);
-
-void job_string(Job* job, char* string);
-
 
 #endif //CSUBATCH_JOB_H

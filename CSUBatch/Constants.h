@@ -2,8 +2,9 @@
 //  Constants.h
 //  CSUBatch
 //
-//  Created by Michael Moore on 9/9/19.
+//  Created by George Moore and Tayler Cooper on 9/9/19.
 //  Copyright © 2019 George Moore. All rights reserved.
+//  Copyright © 2019 Tayler Cooper. All rights reserved.
 //
 // The following is a database of strings used in the CommandLineParser.
 // I've put them in a dedicated file for modularity
@@ -24,7 +25,7 @@
 #define quit_str "quit"
 
 //This macro defines the maximum character length of each user argument.
-#define ARGUMENT_SIZE 100
+#define ARGUMENT_SIZE 25
 
 #define AUTHORS "Tayler Cooper & George Moore"
 
