@@ -9,7 +9,6 @@
 #include <string.h>
 #include <stdbool.h>
 #include "Scheduler.h"
-#include "Errors.h"
 
 
 int start_ui();
@@ -25,6 +24,7 @@ bool parse_input(int argc, char* argv[]);
 int get_string_length(const char string[]);
 int is_num(char c);
 int is_alpha(char c);
+int is_num_str(const char str[]);
 typedef void (*command_array)();
 
 

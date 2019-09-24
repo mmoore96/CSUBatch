@@ -74,29 +74,6 @@ Job dequeue(){
     }
 }
 
-//Adds 'job' to the end of the queue
-//Returns exit status; 0 if success
-//To add a new node, we set the new node's 'next' to be the current first node, and then set our
-//reference to the first node to be the new node.
-//TODO: Consider removing this function
-int enqueue(Job *job){
-    if (job_queue_length(__job_queue) == 0){
-        (*__job_queue)->job = job;
-        return 0;
-    }else {
-        Node* new_node = malloc(sizeof(Node));  //Allocate memory for new node
-        if (new_node) {
-            get_last_node()->next = new_node;
-            new_node->job = job;   //Set the job of new node.
-            new_node->next = NULL;
-
-            return 0;
-        }else{
-            return UNABLE_TO_ALLOCATE_MEMORY;
-        }
-    }
-}
-
 
 //This function sets the 'next' pointer for every node to NULL. This makes it easier to sort the job queue
 //Before this function is called, all Node*'s should be copied to an array, then the nodes have their 'next's cleared,
@@ -121,34 +98,29 @@ void free_job_queue(){
 void __free_job_queue_aux(Node* n){
     if (n != NULL) {
         __free_job_queue_aux(n->next);
-        printf("NODE POINTER %p FREED\n", (void*) n);
-        printf("JOB->NAME POINTER %p FREED\n", (void*) n->job->name);
-        printf("JOB POINTER %p FREED\n", (void*) n->job);
         free_job(n->job);
         free(n);
     }
 }
 
+
+//Returns the number of jobs in the queue. Does NOT include a job being executed.
 int job_queue_length(){
     if (lock_owner != pthread_self()){
         // Lock the mutex IF AND ONLY IF the current thread does not already have the lock
         pthread_mutex_lock(&queue_mutex);
         lock_owner = pthread_self();
     }
-    if (*__job_queue == NULL){
-        lock_owner = UNOWNED;
-        pthread_mutex_unlock(&queue_mutex);
-        return 0;
-    }else{
-        return __job_queue_length_aux(1, (*__job_queue)->next);
-    }
+        return __job_queue_length_aux(*__job_queue);
 }
 
-int __job_queue_length_aux(int count, Node* q){
+int __job_queue_length_aux(Node* q){
     if (q == NULL){
-        return count;
+        lock_owner = 0;
+        pthread_mutex_unlock(&queue_mutex);
+        return 0; //Count the current job being executed if it exists
     } else{
-        return __job_queue_length_aux(count + 1, q->next);
+        return 1 + __job_queue_length_aux(q->next);
     }
 }
 
@@ -157,7 +129,7 @@ void print_job_queue(){
     int length = job_queue_length();
     char policy[6];
     get_policy(policy);
-    printf("Total number of jobs in the queue: %d\n", length + ((current_job != NULL) ? 1 : 0));
+    printf("Total number of jobs waiting for dispatch: %d\n", length);
     printf("Scheduling Policy: %s\n", policy);
     printf("Name    \tCPU_Time\tPriority\tArrival\tProgress\n");
     if (current_job != NULL){
@@ -171,3 +143,22 @@ void print_job_queue(){
     }
 }
 
+int job_queue_time(){
+    pthread_mutex_lock(&queue_mutex);
+    lock_owner = pthread_self();
+    return __job_queue_time_aux(*get_queue());
+}
+
+int __job_queue_time_aux(Node* node){
+    if (node == NULL){
+        int current_job_time = 0; //The time of a job running right now
+        if (current_job != NULL){
+            current_job_time = current_job->duration;
+        }
+        lock_owner = 0;
+        pthread_mutex_unlock(&queue_mutex);
+        return current_job_time;
+    } else{
+        return node->job->duration + __job_queue_time_aux(node->next);
+    }
+}

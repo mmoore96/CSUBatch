@@ -7,7 +7,6 @@
 
 #include <stdlib.h>
 #include "Job.h"
-#include "Errors.h"
 #include "Dispatcher.h"
 
 //The job queue will be a linked list comprised of the following Node struct.
@@ -38,7 +37,9 @@ void __clear_node_links_aux(Node* n);
 void free_job_queue();
 void __free_job_queue_aux(Node* q);
 int job_queue_length();
-int __job_queue_length_aux(int count, Node* q);
+int __job_queue_length_aux(Node* q);
+int job_queue_time();
+int __job_queue_time_aux(Node* q);
 void print_job_queue();
 
 #endif //CSUBATCH_JOBQUEUE_H

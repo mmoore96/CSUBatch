@@ -1,6 +1,7 @@
 #include "main.h"
 #include <stdio.h>
 #include "CommandLineParser.h"
+#include "Analytics.h"
 #include <pthread.h>
 #include <stdlib.h>
 
@@ -9,7 +10,11 @@
 //TODO: As a result, a function should be written that locks the mutex and then updates the variable at once. Same for unlocked
 
 int main(int argc, char **argv) {
+    //The following two globals should might as well be defined with their declarations, but for some reason doing so results in a multiple definitions compilation error. So they are defined here at runtime.
     UNOWNED = 0;
+    total_number_of_jobs=0;
+    starting_time = time(NULL);
+
     MAIN = pthread_self();
     int NUM_THREADS = 2;
     pthread_t thr[NUM_THREADS];

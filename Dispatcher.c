@@ -4,12 +4,13 @@
 
 #include "Dispatcher.h"
 #include "Scheduler.h"
+#include "Analytics.h"
 #include <stdio.h>
 #include <sys/wait.h>
 
 void* run_dispatcher(void *_data){
     DISPATCHER = pthread_self();
-    //current_job = malloc(sizeof(Job));
+    time_t job_end_time;
 
     thread_data_t *data;
     data = (thread_data_t*)_data;
@@ -31,16 +32,20 @@ void* run_dispatcher(void *_data){
             lock_owner = UNOWNED;
             pthread_mutex_unlock(&queue_mutex);
             sprintf(args[1], "%d", job.duration);
+            job_start_time = time(NULL);
             if (fork() == 0){
                 execv(args[0], args);
             }else{
                 wait(NULL);
                 current_job = NULL;
             }
+            CPU_time = CPU_time + (float)(time(NULL) - job_start_time);
         }else{
             lock_owner = UNOWNED;
+            job_end_time = time(NULL);
+            pthread_cond_wait(&queue_cond, &queue_mutex);
             pthread_mutex_unlock(&queue_mutex);
-            //TODO: Use pthread_cond_wait here to wait for the main thread to produce a new job instead of constantly checking for a new job
+            waiting_time = waiting_time + (float)(time(NULL) - job_end_time); //Add idling time to global
         }
     }
 
