@@ -17,6 +17,8 @@
 
 //An array for holding job pointers waiting to be added to the queue
 Job* job_buffer[100];
+pthread_mutex_t buffer_mutex; //Used to lock job_buffer when accessed by main thread or scehduler thread.
+pthread_cond_t buffer_cond; //Used by the main thread to indicate that a new job has been added to the buffer
 //sort_flag is checked by the Scheduler thread to know when to sort.
 //the sort method shouldn't be called directly from the commandlineparser because that module runs on the main thread,
 //and sorting requires that the job queue is locked, but the main thread should be separate from needing to lock
