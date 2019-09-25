@@ -72,8 +72,7 @@ void run(){
         printf("%s has been submitted.\n", argv[0]);
         printf("Total number of jobs waiting for dispatch: %d\n", job_queue_length() + 1); //a + 1 to include the job being added.
         printf("Jobs currently running: %d\n", current_job != NULL);
-        int current_job_time_left = (current_job != NULL) ? current_job->duration - (int)(time(NULL) - job_start_time) : 0;
-        printf("Expected waiting time: %d\n", job_queue_time() + current_job_time_left + job_time); // Add the time of the jobs in the queue, the remaining time of the running job, and the new job.
+        printf("Expected waiting time: %d\n", job_queue_time() + job_time); // Add the time of the jobs in the queue, the remaining time of the running job, and the new job.
         //The actual function call to place the job in the queue is after the previous print statements
         //because there's no guarantee that the Scheduler will be able to obtain a lock and place the
         //job in the queue before the print statements calculate their values.

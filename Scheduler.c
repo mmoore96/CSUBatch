@@ -9,7 +9,7 @@
 
 
 void* run_scheduler(void *_data){
-    SCHEDULER = pthread_self(); //
+    SCHEDULER = pthread_self(); //Save the ID of the current thread. useful for debugging, in which it is important to know what thread has a mutex.
     pthread_mutex_init(&buffer_mutex, NULL);
     pthread_cond_init(&buffer_cond, NULL);
     thread_data_t *data;
@@ -66,10 +66,12 @@ void* run_scheduler(void *_data){
     return NULL;
 }
 
-//Post is called by the main thread, from CommandLineParser, and simply adds a job to a buffer, where it waits for
-//the scheduler to place it in the main job queue.
+/// Adds a Job to a buffer, where it waits to be inserted into the job queue by the Scheduler. This function is called from the main thread.
+/// \param job | The job to be added.
 void post(Job* job){
-    pthread_mutex_lock(&buffer_mutex);
+    pthread_mutex_lock(&buffer_mutex); //Lock job buffer
+
+    //Find the first free space in the array to place the job.
     for (int i = 0; i < 100; i ++){
             if (job_buffer[i] == NULL){
                 job_buffer[i] = job;
@@ -77,12 +79,13 @@ void post(Job* job){
             }
         }
 
-    pthread_mutex_unlock(&buffer_mutex);
-    pthread_cond_signal(&buffer_cond);
+    pthread_mutex_unlock(&buffer_mutex); //Unlock job buffer
+    pthread_cond_signal(&buffer_cond); //Signal to Scheduler that a job has been added.
 }
 
-//Used to set the new policy, where fcfs, sjf, and priority are mapped to integers 0, 1, and 2 respectively.
-//This function will be called from the main thread, which is why a flag is set to schedule a sort from the Scheduler thread
+/// Used to set the new policy, where fcfs, sjf, and priority are mapped to integers 0, 1, and 2 respectively.
+///This function will be called from the main thread, which is why a flag is set to schedule a sort from the Scheduler thread
+/// \param p | 0=fcfs, 1=sjf, 2=priority
 void set_scheduling(int p){
     switch (p){
         case 0: schedule_comparator = &compare_age; break;
@@ -96,7 +99,7 @@ void set_scheduling(int p){
 }
 
 /// Called exclusively by Scheduler thread to insert a node into the job queue using selection sort algorithm
-/// \param new_node The node to be added into the queue
+/// \param new_node | The node to be added into the queue
 void insert(Node* new_node){
     if (job_queue_length() == 0){
         *get_queue() = new_node;
@@ -135,7 +138,8 @@ void insert_aux(Node* new_node, Node** current_node){
         }
     }
 }
-//This function should only be called by the Scheduler in the Scheduler thread.
+///Sorts the list by copying every node pointer into an array, resetting the queue, and then reinserting each node into the queue.
+///This function should only be called by the Scheduler in the Scheduler thread.
 void sort(){
     int length = job_queue_length();
     //Create a copy of all Node*'s. Otherwise, it will be impossible to retrieve the nodes after their pointers are cleared with clear_node_linke_length();

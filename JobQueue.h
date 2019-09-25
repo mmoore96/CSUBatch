@@ -24,13 +24,12 @@ struct Node{
 Node** __job_queue;
 
 //The following functions operate on Node types.
-int create_job_queue();
+void create_job_queue();
 Node** get_queue();
 Job* get_job(int index);
 Job* __get_job_aux(int index, Node* q);
 Node* get_node(int index);
 Node* __get_node_aux(int index, Node* q);
-Job* get_last_job();
 Job dequeue();
 void clear_node_links();
 void __clear_node_links_aux(Node* n);
