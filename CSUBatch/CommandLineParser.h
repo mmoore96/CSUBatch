@@ -22,7 +22,7 @@ void list();
 void set_fcfs();
 void set_sjf();
 void set_priority();
-void test();
+void tes();
 void quit();
 void help();
 bool parse_input(int argc, char* argv[]);

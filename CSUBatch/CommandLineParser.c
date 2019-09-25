@@ -18,8 +18,8 @@
 //The following arrays contain the command strings that execute commands, and the commands themselves, respectively.
 //Because they are the same length and are ordered the same, each index provides a mapping between each string and its command.
 //That is, if user enters a string that matches string_array[i], then the function at command_array[i] is called.
-char* string_array[] = {run_str, list_str, fcfs_str, sjf_str, priority_str, test_str, help_str, quit_str};
-command_array (commands[8]) = {run, list, set_fcfs, set_sjf, set_priority, test, help, quit};
+char* string_array[] = {run_str, list_str, fcfs_str, sjf_str, priority_str, tes_str, help_str, quit_str};
+command_array (commands[8]) = {run, list, set_fcfs, set_sjf, set_priority, tes, help, quit};
 
 //The Scheduling and Dispatching threads constantly check this global, terminating when it becomes false.
 bool active = true;
@@ -84,6 +84,7 @@ void run(){
 
 }
 
+
 //Prints job information
 void list(){
     print_job_queue();
@@ -101,9 +102,98 @@ void set_priority(){
     set_scheduling(2);
 }
 
-void test(){
+//void test(){
+//    //Declare pointers to hold the job name, time and priority, which will be parsed from the users input
+//    char name_ptr[100];
+//    memset((void*)name_ptr, 0, 100);
+//    char policy_ptr[100];
+//    memset((void*)policy_ptr, 0, 100);
+//    char jobs_ptr[100];
+//    memset((void*)jobs_ptr, 0, 100);
+//    char priority_ptr[100];
+//    memset(priority_ptr, 0, 100);
+//    char min_cpu_ptr[100];
+//    memset((void*)min_cpu_ptr, 0, 100);
+//    char max_cpu_ptr[100];
+//    memset((void*)max_cpu_ptr, 0, 100);
+//
+//
+//    //Wrap into an array to pass into parse_input
+//    char *argv[6] = {name_ptr, policy_ptr, jobs_ptr, priority_ptr, min_cpu_ptr, max_cpu_ptr};
+//
+//    if(parse_input(6, argv)){
+//        int jobs_ptr = (int)strtol(jobs_ptr, NULL, 0); //Convert time from string to int
+//        int priority = (int)strtol(priority_ptr, NULL, 0); //Convert priority from string to int
+//        Job* job = create_job(name_ptr, policy_ptr, jobs_ptr, priority_ptr, min_cpu_ptr, max_cpu_ptr); //create job
+//
+//        printf("%s has been submitted.\n", argv[0]);
+//        printf("Total number of jobs waiting for dispatch: %d\n", job_queue_length() + 1); //a + 1 to include the job being added.
+//        printf("Jobs currently running: %d\n", current_job != NULL);
+//        printf("Expected waiting time: %d\n", job_queue_time() + job_time); // Add the time of the jobs in the queue, the remaining time of the running job, and the new job.
+//        //The actual function call to place the job in the queue is after the previous print statements
+//        //because there's no guarantee that the Scheduler will be able to obtain a lock and place the
+//        //job in the queue before the print statements calculate their values.
+//        total_number_of_jobs++;
+//        post(job); //Post to scheduler
+//    }
+//}
 
+void tes(){
+    int j = 0;
+    for ( int i = 0; i < 6; i ++){
+    
+    //Declare pointers to hold the job name, time and priority, which will be parsed from the users input
+    //run();
+    char name_ptr[100];
+    memset((void*)name_ptr, 0, 100);
+    char time_ptr[100];
+    memset((void*)time_ptr, 0, 100);
+    char priority_ptr[100];
+    memset(priority_ptr, 0, 100);
+    char *argv[3] = {name_ptr, time_ptr, priority_ptr};
+        
+    if(parse_input(3, argv)){
+    int job_time = (int)strtol(time_ptr, NULL, 0); //Convert time from string to int
+    int priority = (int)strtol(priority_ptr, NULL, 0);
+    Job* job = create_job(name_ptr, job_time, priority -j);
+     total_number_of_jobs++;
+        j++;
+     post(job);
+    }
+    //Wrap into an array to pass into parse_input
+//    char *argv[3] = {name_ptr, time_ptr, priority_ptr};
+//
+//    if(parse_input(3, argv)){
+//        int job_time = (int)strtol(time_ptr, NULL, 0); //Convert time from string to int
+//        int priority = (int)strtol(priority_ptr, NULL, 0); //Convert priority from string to int
+//
+//        Job* job = create_job(name_ptr, job_time, priority); //create job
+//
+//        printf("%s has been submitted.\n", argv[0]);
+//        printf("Total number of jobs waiting for dispatch: %d\n", job_queue_length() + 1); //a + 1 to include the job being added.
+//        printf("Jobs currently running: %d\n", current_job != NULL);
+//        printf("Expected waiting time: %d\n", job_queue_time() + job_time); // Add the time of the jobs in the queue, the remaining time of the running job, and the new job.
+//        //The actual function call to place the job in the queue is after the previous print statements
+//        //because there's no guarantee that the Scheduler will be able to obtain a lock and place the
+//        //job in the queue before the print statements calculate their values.
+//        total_number_of_jobs++;
+//        post(job); //Post to scheduler
+//        }
+   }
+//    active = false;
+//    pthread_cond_signal(&buffer_cond); //This unfreezes the scheduler thread in case it's waiting for a job to be inserted.
+//    free_job_queue();
+    float n_jobs = (float)total_number_of_jobs; //Cast to float for division below.
+    float avg_CPU_time = CPU_time / n_jobs;
+    float avg_waiting_time = waiting_time / n_jobs;
+    printf("Total number of jobs submitted: %d\n", (int)n_jobs);
+    printf("Average turnaround time: %.2f\n", avg_CPU_time + avg_waiting_time);
+    printf("Average CPU time: %.2f\n", avg_CPU_time);
+    printf("Average waiting time: %.2f\n", avg_waiting_time);
+    printf("Throughput: %f No./second\n", n_jobs / (float)(time(NULL) - starting_time));
+     
 }
+
 
 void quit(){
     //Free up all job memory
