@@ -10,7 +10,11 @@
 #include "Job.h"
 #include <stdio.h>
 
-//Allocates memory for a job. Returns pointer to memory location.
+/// Allocates memory for a job
+/// \param name | Name of job
+/// \param duration | Job duration
+/// \param priority | Job priority
+/// \return | Pointer to the newly allocated and initialized job.
 Job* create_job(char* name, int duration, int priority){
     time_t t = time(NULL);
     struct tm time = *localtime(&t);
@@ -25,7 +29,8 @@ Job* create_job(char* name, int duration, int priority){
     return job;
 }
 
-//Frees memory after usage
+/// Free job memory.
+/// \param job | Job to free.
 void free_job(Job* job){
     free(job->name);
     free(job->arrival_time);

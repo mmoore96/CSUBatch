@@ -14,7 +14,9 @@
 
 
 void* run_scheduler(void *_data){
-    SCHEDULER = pthread_self();
+    SCHEDULER = pthread_self(); //Save the ID of the current thread. useful for debugging, in which it is important to know what thread has a mutex.
+    pthread_mutex_init(&buffer_mutex, NULL);
+    pthread_cond_init(&buffer_cond, NULL);
     thread_data_t *data;
     data = (thread_data_t*)_data;
     sort_flag = false;
@@ -23,7 +25,8 @@ void* run_scheduler(void *_data){
     for (int i = 0; i < 100; i ++){
         job_buffer[i] = NULL;
     }
-
+    // Lock the buffer mutex before the loop begins
+    pthread_mutex_lock(&buffer_mutex);
     while (*data->active){
         bool job_found = false;
         if (sort_flag){
@@ -32,6 +35,7 @@ void* run_scheduler(void *_data){
             sort();
             lock_owner = UNOWNED;
             pthread_mutex_unlock(&queue_mutex);
+            pthread_cond_signal(&queue_cond);
             sort_flag = false;
         }
         for (int i = 0; i < 100; i ++){
@@ -46,11 +50,15 @@ void* run_scheduler(void *_data){
                 insert(new_node);
                 lock_owner = UNOWNED;
                 pthread_mutex_unlock(&queue_mutex);
+                pthread_cond_signal(&queue_cond);
             }
+            pthread_mutex_unlock(&buffer_mutex);
+
         }
-        //If no job was found in the entire buffer, wait a second before checking again to improve performance.
+        //If no job was found in the entire buffer, suspend thread until a job has been added or until user exit.
         if (!job_found){
-            //TODO: Use pthread_cond_wait here to wait for the main thread to produce a new job instead of constantly checking for a new job
+            pthread_mutex_lock(&buffer_mutex);
+            pthread_cond_wait(&buffer_cond, &buffer_mutex);
         }
     }
     printf("Terminating Scheduler\n");
@@ -63,45 +71,51 @@ void* run_scheduler(void *_data){
     return NULL;
 }
 
-//Post is called by the main thread, from CommandLineParser, and simply adds a job to a buffer, where it waits for
-//the scheduler to place it in the main job queue.
+/// Adds a Job to a buffer, where it waits to be inserted into the job queue by the Scheduler. This function is called from the main thread.
+/// \param job | The job to be added.
 void post(Job* job){
-    //TODO: check to see if job_buffer should be locked before use, since it can be written to by scheduler thread
-        for (int i = 0; i < 100; i ++){
+    pthread_mutex_lock(&buffer_mutex); //Lock job buffer
+
+    //Find the first free space in the array to place the job.
+    for (int i = 0; i < 100; i ++){
             if (job_buffer[i] == NULL){
                 job_buffer[i] = job;
                 break;
             }
         }
+
+    pthread_mutex_unlock(&buffer_mutex); //Unlock job buffer
+    pthread_cond_signal(&buffer_cond); //Signal to Scheduler that a job has been added.
 }
 
-//Used to set the new policy, where fcfs, sjf, and priority are mapped to integers 0, 1, and 2 respectively.
+/// Used to set the new policy, where fcfs, sjf, and priority are mapped to integers 0, 1, and 2 respectively.
+///This function will be called from the main thread, which is why a flag is set to schedule a sort from the Scheduler thread
+/// \param p | 0=fcfs, 1=sjf, 2=priority
 void set_scheduling(int p){
     switch (p){
         case 0: schedule_comparator = &compare_age; break;
         case 1: schedule_comparator = &compare_duration; break;
         case 2: schedule_comparator = &compare_priority; break;
-        default: printf("ERROR: SET_SCHEDULING METHOD GIVEN UNKNOWN VALUE %d!\n", p);
+        default: printf("ERROR: SET_SCHEDULING FUNCTION GIVEN UNKNOWN VALUE %d!\n", p);
     }
-    sort();
-    printf("Queue has been reordered.\n");
-    print_job_queue();
+    sort_flag = true;
+    printf("Scheduling a policy change...\n");
+    pthread_cond_signal(&buffer_cond);
 }
 
-
+/// Called exclusively by Scheduler thread to insert a node into the job queue using selection sort algorithm
+/// \param new_node | The node to be added into the queue
 void insert(Node* new_node){
     if (job_queue_length() == 0){
-        Node **extractedExpr = get_queue();
-        *extractedExpr = new_node;
+        *get_queue() = new_node;
     }else{
         insert_aux(new_node, get_queue());
     }
 }
 
-//A recursive helper function for insert.
-//It is initially called by insert and the node given should refer to the beginning of the queue.
-//Each recursive call passes in the next node after the on passed in, so that the job is compared against each
-//node in the queue
+/// A recursive helper function. This function should be initially called from insert() with current_node being a pointer to the first node in the queue
+/// \param new_node | The node to be inserted
+/// \param current_node | The current node already in the job queue by which new_node is being compared.
 void insert_aux(Node* new_node, Node** current_node){
     Job* new_job = new_node->job;
     Node* next_node = ((*current_node)->next); //The node after the one being compared currently
@@ -129,7 +143,8 @@ void insert_aux(Node* new_node, Node** current_node){
         }
     }
 }
-//This function should only be called by the Scheduler in the Scheduler thread.
+///Sorts the list by copying every node pointer into an array, resetting the queue, and then reinserting each node into the queue.
+///This function should only be called by the Scheduler in the Scheduler thread.
 void sort(){
     int length = job_queue_length();
     //Create a copy of all Node*'s. Otherwise, it will be impossible to retrieve the nodes after their pointers are cleared with clear_node_linke_length();
@@ -143,6 +158,8 @@ void sort(){
     for (int i = 0; i < length; i ++){
         insert(nodes[i]);
     }
+    print_job_queue();
+    printf("Queue has been reordered.\n>");
 }
 
 void get_policy(char policy[]){
@@ -151,5 +168,5 @@ void get_policy(char policy[]){
     else if (schedule_comparator == compare_priority)
         strcpy(policy, "Priority");
     else if (schedule_comparator == compare_duration)
-        strcpy(policy, "sjf");
+        strcpy(policy, "SJF");
 }

@@ -14,6 +14,7 @@
 #include <string.h>
 #include <time.h>
 
+
 typedef struct{
     char* name;
     int priority;

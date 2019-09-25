@@ -11,24 +11,21 @@
 #include "Scheduler.h"
 #include "Job.h"
 #include "JobQueue.h"
+#include "Analytics.h"
 #include <stdlib.h>
 #include <string.h>
 
 //The following arrays contain the command strings that execute commands, and the commands themselves, respectively.
 //Because they are the same length and are ordered the same, each index provides a mapping between each string and its command.
 //That is, if user enters a string that matches string_array[i], then the function at command_array[i] is called.
-const char* string_array[] = {run_str, list_str, fcfs_str, sjf_str, priority_str, test_str, help_str, quit_str};
+char* string_array[] = {run_str, list_str, fcfs_str, sjf_str, priority_str, test_str, help_str, quit_str};
 command_array (commands[8]) = {run, list, set_fcfs, set_sjf, set_priority, test, help, quit};
 
-//When this is set to false, the application exits.
+//The Scheduling and Dispatching threads constantly check this global, terminating when it becomes false.
 bool active = true;
 
 //Our input buffer
 char in[255] = "";
-
-//A buffer for holding error messages. When an error occurs, its description will be stored here.
-//If it is not an empty string at the end of each start_ui loop, it should be printed, and then set to an empty string.
-char error_log[255] = "";
 
 
 //This is the main loop of the command loop. It prints the initial prompt, initializes our input buffer,
@@ -39,9 +36,11 @@ int start_ui(){
     while (active){
         printf(">");
         bool command_found = false; //We assume a command will not be found before checking.
-        fgets(in, 255, stdin);  //Grab user input, max of 255 characters. TODO: Add input validation for the input
+        fgets(in, 255, stdin);  //Grab user input, max of 255 characters.
         for (int i = 0; i < 8; i ++){
-            if (strncmp(in, string_array[i], get_string_length(in)) == 0){ //If command name matches a command
+            char* command_name = string_array[i];
+
+            if (strncmp(in, command_name, get_string_length(command_name)) == 0){ //If command name matches a command
 
                 (*commands[i])(); //Execute command
                 command_found = true;
@@ -49,15 +48,9 @@ int start_ui(){
             }
         }
         if (command_found == false){
-            strcpy(error_log, "Unknown command. Type help for command list");
+            printf("Unknown command. Type help for command list");
         }
 
-        //Check if error_log is not empty string
-        if (error_log[0] != '\0'){
-            printf("ERROR: %s", error_log); //Print error
-            error_log[0] = '\0'; //Clear error
-        }
-        strcpy(in, "");
     }
     return 0;
 }
@@ -74,11 +67,21 @@ void run(){
     char *argv[3] = {name_ptr, time_ptr, priority_ptr};
 
     if(parse_input(3, argv)){
-        int time = (int)strtol(time_ptr, NULL, 0); //Convert time from string to int
+        int job_time = (int)strtol(time_ptr, NULL, 0); //Convert time from string to int
         int priority = (int)strtol(priority_ptr, NULL, 0); //Convert priority from string to int
-        Job* job = create_job(name_ptr, time, priority); //create job
+        Job* job = create_job(name_ptr, job_time, priority); //create job
+
+        printf("%s has been submitted.\n", argv[0]);
+        printf("Total number of jobs waiting for dispatch: %d\n", job_queue_length() + 1); //a + 1 to include the job being added.
+        printf("Jobs currently running: %d\n", current_job != NULL);
+        printf("Expected waiting time: %d\n", job_queue_time() + job_time); // Add the time of the jobs in the queue, the remaining time of the running job, and the new job.
+        //The actual function call to place the job in the queue is after the previous print statements
+        //because there's no guarantee that the Scheduler will be able to obtain a lock and place the
+        //job in the queue before the print statements calculate their values.
+        total_number_of_jobs++;
         post(job); //Post to scheduler
     }
+
 }
 
 //Prints job information
@@ -104,8 +107,17 @@ void test(){
 
 void quit(){
     //Free up all job memory
-    free_job_queue();
     active = false;
+    pthread_cond_signal(&buffer_cond); //This unfreezes the scheduler thread in case it's waiting for a job to be inserted.
+    free_job_queue();
+    float n_jobs = (float)total_number_of_jobs; //Cast to float for division below.
+    float avg_CPU_time = CPU_time / n_jobs;
+    float avg_waiting_time = waiting_time / n_jobs;
+    printf("Total number of jobs submitted: %d\n", (int)n_jobs);
+    printf("Average turnaround time: %.2f\n", avg_CPU_time + avg_waiting_time);
+    printf("Average CPU time: %.2f\n", avg_CPU_time);
+    printf("Average waiting time: %.2f\n", avg_waiting_time);
+    printf("Throughput: %f No./second\n", n_jobs / (float)(time(NULL) - starting_time));
 }
 
 
@@ -155,6 +167,14 @@ bool parse_input(int argc, char* argv[]){
             word_beginning = word_end + 2; //Update the pointer to the beginning of the next word.
         }
     }
+    for (int i = 1; i < argc; i ++){
+        if (!is_num_str(argv[i])){
+            printf("ERROR: Argument %d must be integer.\n", i);
+            free(word_beginning);
+            return false;
+        }
+
+    }
     return true;
 }
 
@@ -183,4 +203,13 @@ int is_alpha(char c){
     }else{
         return 0;
     }
+}
+
+// Returns 1 if the string is a number
+int is_num_str(const char str[]){
+    for (int i = 0; str[i]; i ++){
+        if (!is_num(str[i]))
+            return 0;
+    }
+    return 1;
 }

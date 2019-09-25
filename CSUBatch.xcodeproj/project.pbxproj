@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A578F7612326E6DA00E55FC7 /* JobQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = A578F7602326E6DA00E55FC7 /* JobQueue.c */; };
 		A578F7642326E73F00E55FC7 /* SchedulingPolicies.c in Sources */ = {isa = PBXBuildFile; fileRef = A578F7632326E73F00E55FC7 /* SchedulingPolicies.c */; };
+		A5938938233B3A71006E8D23 /* Analytics.c in Sources */ = {isa = PBXBuildFile; fileRef = A5938937233B3A71006E8D23 /* Analytics.c */; };
 		A5A8766E232072DC0075A687 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = A5A8766D232072DC0075A687 /* main.c */; };
 		A5A87676232077280075A687 /* CommandLineParser.c in Sources */ = {isa = PBXBuildFile; fileRef = A5A87675232077280075A687 /* CommandLineParser.c */; };
 		A5A87679232077500075A687 /* Dispatcher.c in Sources */ = {isa = PBXBuildFile; fileRef = A5A87678232077500075A687 /* Dispatcher.c */; };
@@ -36,6 +37,8 @@
 		A578F7622326E73F00E55FC7 /* SchedulingPolicies.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SchedulingPolicies.h; sourceTree = "<group>"; };
 		A578F7632326E73F00E55FC7 /* SchedulingPolicies.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SchedulingPolicies.c; sourceTree = "<group>"; };
 		A578F7682326F40300E55FC7 /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
+		A5938936233B3A71006E8D23 /* Analytics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Analytics.h; sourceTree = "<group>"; };
+		A5938937233B3A71006E8D23 /* Analytics.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Analytics.c; sourceTree = "<group>"; };
 		A5A8766A232072DC0075A687 /* CSUBatch */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CSUBatch; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5A8766D232072DC0075A687 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		A5A87674232077280075A687 /* CommandLineParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommandLineParser.h; sourceTree = "<group>"; };
@@ -90,6 +93,8 @@
 				A578F7602326E6DA00E55FC7 /* JobQueue.c */,
 				A5A8767B232077890075A687 /* Job.c */,
 				A5A87675232077280075A687 /* CommandLineParser.c */,
+				A5938936233B3A71006E8D23 /* Analytics.h */,
+				A5938937233B3A71006E8D23 /* Analytics.c */,
 				A5A8767D232077B30075A687 /* Scheduler.h */,
 				A578F7622326E73F00E55FC7 /* SchedulingPolicies.h */,
 				A578F7632326E73F00E55FC7 /* SchedulingPolicies.c */,
@@ -159,6 +164,7 @@
 				A5A87676232077280075A687 /* CommandLineParser.c in Sources */,
 				A5A8767F232077B30075A687 /* Scheduler.c in Sources */,
 				A5A8767C232077890075A687 /* Job.c in Sources */,
+				A5938938233B3A71006E8D23 /* Analytics.c in Sources */,
 				A578F7612326E6DA00E55FC7 /* JobQueue.c in Sources */,
 				A5A87679232077500075A687 /* Dispatcher.c in Sources */,
 				A5A8766E232072DC0075A687 /* main.c in Sources */,
