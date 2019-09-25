@@ -50,11 +50,6 @@ void* run_scheduler(void *_data){
             pthread_mutex_unlock(&buffer_mutex);
 
         }
-        //If no job was found in the entire buffer, suspend thread until a job has been added or until user exit.
-        if (!job_found){
-            pthread_mutex_lock(&buffer_mutex);
-            pthread_cond_wait(&buffer_cond, &buffer_mutex);
-        }
     }
     printf("Terminating Scheduler\n");
     //Free any job pointers residing in the job buffer

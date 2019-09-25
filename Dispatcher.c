@@ -10,7 +10,7 @@
 
 void* run_dispatcher(void *_data){
     DISPATCHER = pthread_self();
-    time_t job_end_time;
+    time_t job_end_time = time(NULL);
 
     thread_data_t *data;
     data = (thread_data_t*)_data;
@@ -27,6 +27,7 @@ void* run_dispatcher(void *_data){
         pthread_mutex_lock(&queue_mutex);
         lock_owner = pthread_self();
         if (job_queue_length() > 0){
+            //waiting_time = waiting_time + (float)(time(NULL) - idle_timer);
             Job job = dequeue();
             current_job = &job;
             lock_owner = UNOWNED;
@@ -39,13 +40,12 @@ void* run_dispatcher(void *_data){
                 wait(NULL);
                 current_job = NULL;
             }
-            CPU_time = CPU_time + (float)(time(NULL) - job_start_time);
-        }else{
-            lock_owner = UNOWNED;
             job_end_time = time(NULL);
-            pthread_cond_wait(&queue_cond, &queue_mutex);
-            pthread_mutex_unlock(&queue_mutex);
+            CPU_time = CPU_time + (float)(time(NULL) - job_start_time);
+
+        }else{
             waiting_time = waiting_time + (float)(time(NULL) - job_end_time); //Add idling time to global
+            job_end_time = time(NULL); //Even if there is no job ending, update job end time so the above line correctly adds the idle time.
         }
     }
 

@@ -100,22 +100,37 @@ void set_priority(){
 }
 
 void test(){
+    //Declare parameters
+    char benchmark_ptr[100]; //Size of 100 is arbitrary
+    char policy_ptr[100]; //Size of largest policy, FCFS, is 4.
+    char job_num_ptr[100]; //Size of 100 is arbitrary
+    char priority_levels[100]; //Size of 100 is arbitrary
+    char min_cpu_time_ptr[100]; //Size of 100 in arbitrary
+    char max_cpu_time_ptr[100]; //Size of 100 is arbitrary
+
+    char *argv[6] = {benchmark_ptr, policy_ptr, job_num_ptr, priority_levels, min_cpu_time_ptr, max_cpu_time_ptr};
+    for (int i = 0; i < 6; i ++){
+        memset((void*)argv[i], 0, 100);
+    }
 
 }
 
 void quit(){
     //Free up all job memory
     active = false;
-    pthread_cond_signal(&buffer_cond); //This unfreezes the scheduler thread in case it's waiting for a job to be inserted.
     free_job_queue();
-    float n_jobs = (float)total_number_of_jobs; //Cast to float for division below.
-    float avg_CPU_time = CPU_time / n_jobs;
-    float avg_waiting_time = waiting_time / n_jobs;
-    printf("Total number of jobs submitted: %d\n", (int)n_jobs);
-    printf("Average turnaround time: %.2f\n", avg_CPU_time + avg_waiting_time);
-    printf("Average CPU time: %.2f\n", avg_CPU_time);
-    printf("Average waiting time: %.2f\n", avg_waiting_time);
-    printf("Throughput: %f No./second\n", n_jobs / (float)(time(NULL) - starting_time));
+    if (total_number_of_jobs > 0){
+        float n_jobs = (float)total_number_of_jobs; //Cast to float for division below.
+        float avg_CPU_time = CPU_time / n_jobs;
+        float avg_waiting_time = waiting_time / n_jobs;
+        printf("Total number of jobs submitted: %d\n", (int)n_jobs);
+        printf("Average turnaround time: %.2f\n", avg_CPU_time + avg_waiting_time);
+        printf("Average CPU time: %.2f\n", avg_CPU_time);
+        printf("Average waiting time: %.2f\n", avg_waiting_time);
+        printf("Throughput: %.2f No./second\n", n_jobs / (float)(time(NULL) - starting_time));
+    }else
+        printf("As no jobs were ever provided, there are no analytics.\n");
+
 }
 
 

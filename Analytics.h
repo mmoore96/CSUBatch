@@ -5,7 +5,7 @@
 #ifndef CSUBATCH_ANALYTICS_H
 #define CSUBATCH_ANALYTICS_H
 
-#include <bits/types/time_t.h>
+#include <time.h>
 
 time_t starting_time;
 int total_number_of_jobs;
