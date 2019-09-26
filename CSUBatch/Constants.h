@@ -20,7 +20,7 @@
 #define fcfs_str "fcfs"
 #define sjf_str "sjf"
 #define priority_str "priority"
-#define tes_str "tes"
+#define test_str "test"
 #define help_str "help"
 #define quit_str "quit"
 

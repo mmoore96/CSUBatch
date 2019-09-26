@@ -92,7 +92,6 @@ void __clear_node_links_aux(Node* n){
 ///Frees the memory of all jobs and nodes.
 void free_job_queue(){
     __free_job_queue_aux(*__job_queue);
-    free(__job_queue);
 }
 
 void __free_job_queue_aux(Node* n){

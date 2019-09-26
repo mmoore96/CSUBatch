@@ -21,9 +21,13 @@
 
 int main(int argc, char **argv) {
     //The following two globals should might as well be defined with their declarations, but for some reason doing so results in a multiple definitions compilation error. So they are defined here at runtime.
+    
     UNOWNED = 0;
     total_number_of_jobs=0;
     starting_time = time(NULL);
+    turnaround_time = 0;
+    CPU_time = 0;
+    waiting_time = 0;
 
     MAIN = pthread_self();
     int NUM_THREADS = 2;

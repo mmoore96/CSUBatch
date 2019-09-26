@@ -26,7 +26,6 @@ void* run_scheduler(void *_data){
         job_buffer[i] = NULL;
     }
     // Lock the buffer mutex before the loop begins
-    pthread_mutex_lock(&buffer_mutex);
     while (*data->active){
         bool job_found = false;
         if (sort_flag){
@@ -39,6 +38,7 @@ void* run_scheduler(void *_data){
             sort_flag = false;
         }
         for (int i = 0; i < 100; i ++){
+            pthread_mutex_lock(&buffer_mutex);
             if (job_buffer[i] != NULL){
                 job_found = true;
                 Node* new_node = malloc(sizeof(Node));
@@ -56,10 +56,7 @@ void* run_scheduler(void *_data){
 
         }
         //If no job was found in the entire buffer, suspend thread until a job has been added or until user exit.
-        if (!job_found){
-            pthread_mutex_lock(&buffer_mutex);
-            pthread_cond_wait(&buffer_cond, &buffer_mutex);
-        }
+        
     }
     printf("Terminating Scheduler\n");
     //Free any job pointers residing in the job buffer

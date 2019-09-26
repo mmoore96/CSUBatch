@@ -16,15 +16,15 @@
 #include "Scheduler.h"
 
 
-int start_ui();
-void run();
-void list();
-void set_fcfs();
-void set_sjf();
-void set_priority();
-void tes();
-void quit();
-void help();
+int start_ui(void);
+void run(void);
+void list(void);
+void set_fcfs(void);
+void set_sjf(void);
+void set_priority(void);
+void test(void);
+void quit(void);
+void help(void);
 bool parse_input(int argc, char* argv[]);
 int get_string_length(const char string[]);
 int is_num(char c);

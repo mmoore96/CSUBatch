@@ -24,7 +24,7 @@ void* run_dispatcher(void *_data){
     //array be null terminated.
     char job_duration[10];
     char* args[3];
-    args[0] = "batch_job";
+    args[0] = "/Users/MichaelMoore/batchjob";
     args[1] = job_duration;
     args[2] = NULL;
 
@@ -46,10 +46,6 @@ void* run_dispatcher(void *_data){
             }
             CPU_time = CPU_time + (float)(time(NULL) - job_start_time);
         }else{
-            lock_owner = UNOWNED;
-            job_end_time = time(NULL);
-            pthread_cond_wait(&queue_cond, &queue_mutex);
-            pthread_mutex_unlock(&queue_mutex);
             waiting_time = waiting_time + (float)(time(NULL) - job_end_time); //Add idling time to global
         }
     }
