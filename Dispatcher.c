@@ -10,9 +10,9 @@
 #include <sys/wait.h>
 
 void* run_dispatcher(void *_data){
-    DISPATCHER = pthread_self();
     time_t start_idle;
     time_t job_end_time;
+    char time_end[8];
     struct tm t;
 
     thread_data_t *data;
@@ -28,16 +28,15 @@ void* run_dispatcher(void *_data){
 
     while (*data->active){
         pthread_mutex_lock(&queue_mutex);
-        lock_owner = pthread_self();
         if (job_queue_length() > 0){
             Job job = dequeue();
             pthread_cond_signal(&queue_cond);
             current_job = &job;
-            lock_owner = UNOWNED;
             pthread_mutex_unlock(&queue_mutex);
             sprintf(args[1], "%d", job.duration);
             job_start_time = time(NULL);
-            printf("[DISPATCH] Executing %s at %s\n", job.name, get_time());
+            sprintf(time_end, "%s", get_time(job.duration));
+            printf("[DISPATCH] Executing %s at %s\n\t Estimated job end time: %s\n", job.name, get_time(0), time_end);
             if (fork() == 0){
                 execv(args[0], args);
             }else{
@@ -45,7 +44,7 @@ void* run_dispatcher(void *_data){
                 current_job = NULL;
                 job_end_time = time(NULL);
                 t = *localtime(&job_end_time);
-                printf("[DISPATCH] Job %s completed at %s\n\n", job.name, get_time());
+                printf("[DISPATCH] Job %s completed at %s\n\n", job.name, get_time(0));
             }
             //Lock the queue and signal to the main thread that a job has been completed.
             if (signal_on_job_completion) {

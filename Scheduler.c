@@ -24,12 +24,9 @@ void* run_scheduler(void *_data){
     }
     // Lock the buffer mutex before the loop begins
     //pthread_mutex_lock(&buffer_mutex);
-    buffer_owner = SCHEDULER;
     while (*data->active){
         if (sort_flag){
-            lock_owner = SCHEDULER;
             sort();
-            lock_owner = UNOWNED;
             pthread_mutex_unlock(&queue_mutex);
             pthread_cond_signal(&queue_cond);
             sort_flag = false;
@@ -37,7 +34,6 @@ void* run_scheduler(void *_data){
 
         for (int i = 0; i < 100; i ++){
             pthread_mutex_lock(&buffer_mutex);
-            buffer_owner = pthread_self();
             if (job_buffer[i] != NULL){
                 job_added = true;
                 Node* new_node = malloc(sizeof(Node));
@@ -45,17 +41,13 @@ void* run_scheduler(void *_data){
                 new_node->next = NULL;
                 job_buffer[i] = NULL;
                 pthread_mutex_lock(&queue_mutex);
-                lock_owner = SCHEDULER;
                 insert(new_node);
-                lock_owner = UNOWNED;
                 pthread_cond_signal(&queue_cond);
                 pthread_mutex_unlock(&queue_mutex);
             }
             pthread_mutex_unlock(&buffer_mutex);
-            buffer_owner = UNOWNED;
         }
         pthread_mutex_lock(&buffer_mutex);
-        buffer_owner = SCHEDULER;
         if (!job_added) {
             pthread_cond_wait(&buffer_cond, &buffer_mutex);
             // Scheduler will now have lock after wait!
@@ -68,7 +60,7 @@ void* run_scheduler(void *_data){
         pthread_mutex_unlock(&buffer_mutex);
 
     }
-    printf("Terminating Scheduler\n");
+    printf("[SCHEDULER] Terminating Scheduler\n");
     //Free any job pointers residing in the job buffer
     for (int i = 0; i < 100; i ++){
         if (job_buffer[i] != NULL){
@@ -82,7 +74,6 @@ void* run_scheduler(void *_data){
 /// \param job | The job to be added.
 void post(Job* job){
     pthread_mutex_lock(&buffer_mutex); //Lock job buffer
-    buffer_owner = MAIN;
 
     //Find the first free space in the array to place the job.
     for (int i = 0; i < 100; i ++){
@@ -94,7 +85,6 @@ void post(Job* job){
 
     pthread_cond_signal(&buffer_cond); //Signal to Scheduler that a job has been added.
     pthread_mutex_unlock(&buffer_mutex); //Unlock job buffer
-    buffer_owner = UNOWNED;
 }
 
 /// Used to set the new policy, where fcfs, sjf, and priority are mapped to integers 0, 1, and 2 respectively.

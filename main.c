@@ -50,8 +50,11 @@ int main(int argc, char **argv) {
     return EXIT_SUCCESS;
 }
 
-char* get_time(){
-    time_t t = time(NULL);
+/// Get's the current time and formats it as a string.
+/// \param job_time | If provided, the string returned will be the current time plus the job time.
+/// \return | A pointer to the string containing the time.
+char* get_time(int job_time){
+    time_t t = time(NULL) + (time_t)job_time;
     struct tm t1 = *localtime(&t);
     sprintf(time_ptr, "%02d:%02d:%02d", t1.tm_hour, t1.tm_min, t1.tm_sec);
     return time_ptr;

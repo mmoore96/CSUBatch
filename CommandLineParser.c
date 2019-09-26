@@ -25,7 +25,6 @@ bool active = true;
 //Our input buffer
 char in[255] = "";
 
-
 //This is the main loop of the command loop. It prints the initial prompt, initializes our input buffer,
 //and begins looping, asking for input and carrying out tasks until 'quit' is entered and returns from the loop.
 
@@ -102,32 +101,39 @@ void set_priority(){
 void test(){
     //Declare parameters
     char benchmark_ptr[100]; //Size of 100 is arbitrary
-    char policy_ptr[100]; //Size of largest policy, FCFS, is 4.
+    char policy_ptr[100]; //Size of 100 is arbitrary
     char job_num_ptr[100]; //Size of 100 is arbitrary
     char priority_ptr[100]; //Size of 100 is arbitrary
     char min_cpu_time_ptr[100]; //Size of 100 in arbitrary
     char max_cpu_time_ptr[100]; //Size of 100 is arbitrary
 
+    //Wrap pointers into an array to pass into parse_input
     char *argv[6] = {benchmark_ptr, policy_ptr, job_num_ptr, priority_ptr, min_cpu_time_ptr, max_cpu_time_ptr};
     for (int i = 0; i < 6; i ++){
         memset((void*)argv[i], 0, 100);
     }
 
+    //Separate parameters into separate strings using parse_input
+    //The following block is entered only if parse_input encounters no problems with the user input
     if (parse_input(1, argv)){
         int jobs_num = (int)strtol(job_num_ptr, NULL, 0);
         int priority = (int)strtol(priority_ptr, NULL, 0);
         int min_cpu = (int)strtol(min_cpu_time_ptr, NULL, 0);
         int max_cpu = (int)strtol(max_cpu_time_ptr, NULL, 0);
 
+        //Set scheduling policy. Abort if given unknown polic
         if (!strcmp(policy_ptr, "fcfs")) {
             set_scheduling(0);
         }else if (!strcmp(policy_ptr, "sjf")){
             set_scheduling(1);
-        }else{
+        }else if (!strcmp(policy_ptr, "priority")){
             set_scheduling(2);
+        }else{
+            printf("Unknown policy: %s. Aborting.\n", policy_ptr);
+            return;
         }
 
-
+        //Create jobs and post to job buffer, where it will wait to be inserted into the job queue
         for (int i = 0; i < jobs_num; i ++){
             int job_time = (rand() % (max_cpu - min_cpu + 1)) + min_cpu;
             int job_priority = (rand() % (priority + 1));
@@ -177,6 +183,13 @@ void test(){
 void quit(){
     //Free up all job memory
     active = false;
+    pthread_mutex_lock(&queue_mutex);
+    pthread_mutex_lock(&buffer_mutex);
+    pthread_cond_signal(&queue_cond);
+    pthread_cond_signal(&buffer_cond);
+    pthread_mutex_unlock(&queue_mutex);
+    pthread_mutex_unlock(&buffer_mutex);
+
     free_job_queue();
     if (total_number_of_jobs > 0){
         float n_jobs = (float)total_number_of_jobs; //Cast to float for division below.
