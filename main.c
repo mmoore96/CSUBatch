@@ -17,7 +17,8 @@ int main(int argc, char **argv) {
     turnaround_time = 0;
     CPU_time = 0;
     waiting_time = 0;
-
+    srand(time(NULL));
+    time_ptr = malloc(9);
     MAIN = pthread_self();
     int NUM_THREADS = 2;
     pthread_t thr[NUM_THREADS];
@@ -37,6 +38,7 @@ int main(int argc, char **argv) {
 
     setbuf(stdout, 0);
     start_ui();
+    free(time_ptr);
     printf("Waiting for threads to join...\n");
     active = false;
     /* block until all threads complete */
@@ -46,5 +48,11 @@ int main(int argc, char **argv) {
     printf("Both threads joined; Terminating main.");
 
     return EXIT_SUCCESS;
+}
 
+char* get_time(){
+    time_t t = time(NULL);
+    struct tm t1 = *localtime(&t);
+    sprintf(time_ptr, "%02d:%02d:%02d", t1.tm_hour, t1.tm_min, t1.tm_sec);
+    return time_ptr;
 }

@@ -25,6 +25,7 @@ int get_string_length(const char string[]);
 int is_num(char c);
 int is_alpha(char c);
 int is_num_str(const char str[]);
+void lowercase(char* str);
 typedef void (*command_array)();
 
 

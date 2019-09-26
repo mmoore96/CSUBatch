@@ -15,17 +15,18 @@ void* run_scheduler(void *_data){
     thread_data_t *data;
     data = (thread_data_t*)_data;
     sort_flag = false;
+    job_added = false;
+    buffer_empty = false;
     //Set the default policy to first come first serve by setting the comparator to SchedulingPolicies::compare_age
     schedule_comparator = &compare_age;
     for (int i = 0; i < 100; i ++){
         job_buffer[i] = NULL;
     }
     // Lock the buffer mutex before the loop begins
-    pthread_mutex_lock(&buffer_mutex);
+    //pthread_mutex_lock(&buffer_mutex);
+    buffer_owner = SCHEDULER;
     while (*data->active){
-        bool job_found = false;
         if (sort_flag){
-            pthread_mutex_lock(&queue_mutex);
             lock_owner = SCHEDULER;
             sort();
             lock_owner = UNOWNED;
@@ -33,9 +34,12 @@ void* run_scheduler(void *_data){
             pthread_cond_signal(&queue_cond);
             sort_flag = false;
         }
+
         for (int i = 0; i < 100; i ++){
+            pthread_mutex_lock(&buffer_mutex);
+            buffer_owner = pthread_self();
             if (job_buffer[i] != NULL){
-                job_found = true;
+                job_added = true;
                 Node* new_node = malloc(sizeof(Node));
                 new_node->job = job_buffer[i];
                 new_node->next = NULL;
@@ -44,12 +48,25 @@ void* run_scheduler(void *_data){
                 lock_owner = SCHEDULER;
                 insert(new_node);
                 lock_owner = UNOWNED;
-                pthread_mutex_unlock(&queue_mutex);
                 pthread_cond_signal(&queue_cond);
+                pthread_mutex_unlock(&queue_mutex);
             }
             pthread_mutex_unlock(&buffer_mutex);
-
+            buffer_owner = UNOWNED;
         }
+        pthread_mutex_lock(&buffer_mutex);
+        buffer_owner = SCHEDULER;
+        if (!job_added) {
+            pthread_cond_wait(&buffer_cond, &buffer_mutex);
+            // Scheduler will now have lock after wait!
+        }
+        if (get_buffer_size() == 0) {
+            pthread_cond_signal(&buffer_cond);
+            buffer_empty = true;
+        }
+
+        pthread_mutex_unlock(&buffer_mutex);
+
     }
     printf("Terminating Scheduler\n");
     //Free any job pointers residing in the job buffer
@@ -65,6 +82,7 @@ void* run_scheduler(void *_data){
 /// \param job | The job to be added.
 void post(Job* job){
     pthread_mutex_lock(&buffer_mutex); //Lock job buffer
+    buffer_owner = MAIN;
 
     //Find the first free space in the array to place the job.
     for (int i = 0; i < 100; i ++){
@@ -74,8 +92,9 @@ void post(Job* job){
             }
         }
 
-    pthread_mutex_unlock(&buffer_mutex); //Unlock job buffer
     pthread_cond_signal(&buffer_cond); //Signal to Scheduler that a job has been added.
+    pthread_mutex_unlock(&buffer_mutex); //Unlock job buffer
+    buffer_owner = UNOWNED;
 }
 
 /// Used to set the new policy, where fcfs, sjf, and priority are mapped to integers 0, 1, and 2 respectively.
@@ -159,4 +178,13 @@ void get_policy(char policy[]){
         strcpy(policy, "Priority");
     else if (schedule_comparator == compare_duration)
         strcpy(policy, "SJF");
+}
+
+int get_buffer_size(){
+    int count = 0;
+    for (int i = 0; i < 100; i ++){
+        if (job_buffer[i])
+            count ++;
+    }
+    return count;
 }

@@ -101,18 +101,11 @@ void __free_job_queue_aux(Node* n){
 
 ///Returns the number of jobs in the queue. Does NOT include a job being executed.
 int job_queue_length(){
-    if (lock_owner != pthread_self()){
-        // Lock the mutex IF AND ONLY IF the current thread does not already have the lock
-        pthread_mutex_lock(&queue_mutex);
-        lock_owner = pthread_self();
-    }
-        return __job_queue_length_aux(*__job_queue);
+    return __job_queue_length_aux(*__job_queue);
 }
 
 int __job_queue_length_aux(Node* q){
     if (q == NULL){
-        lock_owner = 0;
-        pthread_mutex_unlock(&queue_mutex);
         return 0; //Count the current job being executed if it exists
     } else{
         return 1 + __job_queue_length_aux(q->next);
