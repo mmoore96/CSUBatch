@@ -16,20 +16,21 @@
 #include "Scheduler.h"
 
 
-int start_ui(void);
-void run(void);
-void list(void);
-void set_fcfs(void);
-void set_sjf(void);
-void set_priority(void);
-void test(void);
-void quit(void);
-void help(void);
+int start_ui();
+void run();
+void list();
+void set_fcfs();
+void set_sjf();
+void set_priority();
+void test();
+void quit();
+void help();
 bool parse_input(int argc, char* argv[]);
 int get_string_length(const char string[]);
 int is_num(char c);
 int is_alpha(char c);
 int is_num_str(const char str[]);
+void lowercase(char* str);
 typedef void (*command_array)();
 
 
