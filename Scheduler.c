@@ -9,11 +9,8 @@
 
 
 void* run_scheduler(void *_data){
-    SCHEDULER = pthread_self(); //Save the ID of the current thread. useful for debugging, in which it is important to know what thread has a mutex.
     pthread_mutex_init(&buffer_mutex, NULL);
     pthread_cond_init(&buffer_cond, NULL);
-    thread_data_t *data;
-    data = (thread_data_t*)_data;
     sort_flag = false;
     job_added = false;
     buffer_empty = false;
@@ -24,8 +21,9 @@ void* run_scheduler(void *_data){
     }
     // Lock the buffer mutex before the loop begins
     //pthread_mutex_lock(&buffer_mutex);
-    while (*data->active){
+    while (active){
         if (sort_flag){
+            pthread_mutex_lock(&queue_mutex);
             sort();
             pthread_mutex_unlock(&queue_mutex);
             pthread_cond_signal(&queue_cond);
@@ -98,7 +96,7 @@ void set_scheduling(int p){
         default: printf("ERROR: SET_SCHEDULING FUNCTION GIVEN UNKNOWN VALUE %d!\n", p);
     }
     sort_flag = true;
-    printf("Scheduling a policy change...\n");
+    printf("[MAIN] Scheduling a policy change...\n");
     pthread_cond_signal(&buffer_cond);
 }
 
@@ -146,21 +144,31 @@ void insert_aux(Node* new_node, Node** current_node){
 ///This function should only be called by the Scheduler in the Scheduler thread.
 void sort(){
     int length = job_queue_length();
+
     //Create a copy of all Node*'s. Otherwise, it will be impossible to retrieve the nodes after their pointers are cleared with clear_node_linke_length();
     Node* nodes[length];
     for (int i = 0; i < length; i ++){
         nodes[i] = get_node(i);
     }
+
     //Set all 'next' members of each Node to NULL, so that they can be properly reset.
     clear_node_links();
+
     //Insert them one by one. insert() automatically places them in the correct order.
     for (int i = 0; i < length; i ++){
         insert(nodes[i]);
     }
-    print_job_queue();
-    printf("Queue has been reordered.\n>");
+    //Print job queue if non empty.
+    if (length > 0){
+        print_job_queue();
+        printf("[SCHEDULER] Queue has been reordered.\n>");
+    }else{
+        printf("[SCHEDULER] Scheduling Policy updated.\n");
+    }
 }
 
+/// Retrieves the current policy
+/// \param policy | A pointer to the string to copy the policy string to
 void get_policy(char policy[]){
     if (schedule_comparator == compare_age)
         strcpy(policy, "FCFS");
@@ -170,6 +178,8 @@ void get_policy(char policy[]){
         strcpy(policy, "SJF");
 }
 
+/// Retrieves the current buffer size
+/// \return | The size of the buffer
 int get_buffer_size(){
     int count = 0;
     for (int i = 0; i < 100; i ++){

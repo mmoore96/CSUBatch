@@ -27,15 +27,24 @@
                 Type 'help' to find more about CSUbatch commands.\n"
 
 
-#define info "run <job> <time> <pri>: submit a job named <job>,\n \
-\texecution time is <time>,\n \
-\tpriority is <pri>.\n \
-list: display the job status.\n \
-change the scheduling policy to FCFS.\n \
-sjf: change the scheduling policy to SJF.\n \
-priority: change the scheduling policy to priority.\n \
-test: <benchmark> <policy> <num_of_jobs> <priority_levels>\n \
-\t <min_CPU_time> <max_CPU_time>\n \
-quit: exit CSUbatch\n"
+#define run_help "run <job> <time> <pri>: \n\tSubmits a job named <job>, \
+execution time is <time>, \
+priority is <pri>.\n"
+
+#define list_help "list: display the job status.\n"
+
+#define fcfs_help "Change the scheduling policy to FCFS.\n"
+
+#define sjf_help "sjf: change the scheduling policy to SJF.\n"
+
+#define priority_help "priority: change the scheduling policy to priority.\n"
+
+#define test_help "test: <benchmark> <policy> <num_of_jobs> <priority_levels> \
+<min_CPU_time> <max_CPU_time>\n\t Submits a batch of <num_of_jobs> jobs named <benchmark>\
+ with random priority levels between 0 and <priority_levels> and execution times randomly\
+between <min_CPU_time> and <max_CPU_time using scheduling policy <policy>\n"
+
+#define quit_help "quit: exit CSUbatch\n"
+
 
 #endif //CSUBATCH_CONSTANTS_H
