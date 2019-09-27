@@ -140,7 +140,6 @@ void print_job_queue(){
 ///Adds up the duration of every job in the queue.
 int job_queue_time(){
     pthread_mutex_lock(&queue_mutex);
-    lock_owner = pthread_self();
     return __job_queue_time_aux(*get_queue());
 }
 
@@ -150,7 +149,6 @@ int __job_queue_time_aux(Node* node){
         if (current_job != NULL){
             current_job_time = current_job->duration - (int)(time(NULL) - job_start_time);
         }
-        lock_owner = 0;
         pthread_mutex_unlock(&queue_mutex);
         return current_job_time;
     } else{
