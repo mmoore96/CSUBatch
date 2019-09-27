@@ -17,7 +17,7 @@ void* run_dispatcher(void *_data){
     //array be null terminated.
     char job_duration[10];
     char* args[3];
-    args[0] = "batch_job";
+    args[0] = "bin/batch_job";
     args[1] = job_duration;
     args[2] = NULL;
 
