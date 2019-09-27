@@ -14,11 +14,8 @@
 
 
 void* run_scheduler(void *_data){
-    SCHEDULER = pthread_self(); //Save the ID of the current thread. useful for debugging, in which it is important to know what thread has a mutex.
     pthread_mutex_init(&buffer_mutex, NULL);
     pthread_cond_init(&buffer_cond, NULL);
-    thread_data_t *data;
-    data = (thread_data_t*)_data;
     sort_flag = false;
     job_added = false;
     buffer_empty = false;
@@ -29,12 +26,10 @@ void* run_scheduler(void *_data){
     }
     // Lock the buffer mutex before the loop begins
     //pthread_mutex_lock(&buffer_mutex);
-    buffer_owner = SCHEDULER;
-    while (*data->active){
+    while (active){
         if (sort_flag){
-            lock_owner = SCHEDULER;
+            pthread_mutex_lock(&queue_mutex);
             sort();
-            lock_owner = UNOWNED;
             pthread_mutex_unlock(&queue_mutex);
             pthread_cond_signal(&queue_cond);
             sort_flag = false;
@@ -42,7 +37,6 @@ void* run_scheduler(void *_data){
 
         for (int i = 0; i < 100; i ++){
             pthread_mutex_lock(&buffer_mutex);
-            buffer_owner = pthread_self();
             if (job_buffer[i] != NULL){
                 job_added = true;
                 Node* new_node = malloc(sizeof(Node));
@@ -50,17 +44,13 @@ void* run_scheduler(void *_data){
                 new_node->next = NULL;
                 job_buffer[i] = NULL;
                 pthread_mutex_lock(&queue_mutex);
-                lock_owner = SCHEDULER;
                 insert(new_node);
-                lock_owner = UNOWNED;
                 pthread_cond_signal(&queue_cond);
                 pthread_mutex_unlock(&queue_mutex);
             }
             pthread_mutex_unlock(&buffer_mutex);
-            buffer_owner = UNOWNED;
         }
         pthread_mutex_lock(&buffer_mutex);
-        buffer_owner = SCHEDULER;
         if (!job_added) {
             pthread_cond_wait(&buffer_cond, &buffer_mutex);
             // Scheduler will now have lock after wait!
@@ -73,7 +63,7 @@ void* run_scheduler(void *_data){
         pthread_mutex_unlock(&buffer_mutex);
 
     }
-    printf("Terminating Scheduler\n");
+    printf("[SCHEDULER] Terminating Scheduler\n");
     //Free any job pointers residing in the job buffer
     for (int i = 0; i < 100; i ++){
         if (job_buffer[i] != NULL){
@@ -87,7 +77,6 @@ void* run_scheduler(void *_data){
 /// \param job | The job to be added.
 void post(Job* job){
     pthread_mutex_lock(&buffer_mutex); //Lock job buffer
-    buffer_owner = MAIN;
 
     //Find the first free space in the array to place the job.
     for (int i = 0; i < 100; i ++){
@@ -99,7 +88,6 @@ void post(Job* job){
 
     pthread_cond_signal(&buffer_cond); //Signal to Scheduler that a job has been added.
     pthread_mutex_unlock(&buffer_mutex); //Unlock job buffer
-    buffer_owner = UNOWNED;
 }
 
 /// Used to set the new policy, where fcfs, sjf, and priority are mapped to integers 0, 1, and 2 respectively.
@@ -113,7 +101,7 @@ void set_scheduling(int p){
         default: printf("ERROR: SET_SCHEDULING FUNCTION GIVEN UNKNOWN VALUE %d!\n", p);
     }
     sort_flag = true;
-    printf("Scheduling a policy change...\n");
+    printf("[MAIN] Scheduling a policy change...\n");
     pthread_cond_signal(&buffer_cond);
 }
 
@@ -161,21 +149,31 @@ void insert_aux(Node* new_node, Node** current_node){
 ///This function should only be called by the Scheduler in the Scheduler thread.
 void sort(){
     int length = job_queue_length();
+
     //Create a copy of all Node*'s. Otherwise, it will be impossible to retrieve the nodes after their pointers are cleared with clear_node_linke_length();
     Node* nodes[length];
     for (int i = 0; i < length; i ++){
         nodes[i] = get_node(i);
     }
+
     //Set all 'next' members of each Node to NULL, so that they can be properly reset.
     clear_node_links();
+
     //Insert them one by one. insert() automatically places them in the correct order.
     for (int i = 0; i < length; i ++){
         insert(nodes[i]);
     }
-    print_job_queue();
-    printf("Queue has been reordered.\n>");
+    //Print job queue if non empty.
+    if (length > 0){
+        print_job_queue();
+        printf("[SCHEDULER] Queue has been reordered.\n>");
+    }else{
+        printf("[SCHEDULER] Scheduling Policy updated.\n");
+    }
 }
 
+/// Retrieves the current policy
+/// \param policy | A pointer to the string to copy the policy string to
 void get_policy(char policy[]){
     if (schedule_comparator == compare_age)
         strcpy(policy, "FCFS");
@@ -185,6 +183,8 @@ void get_policy(char policy[]){
         strcpy(policy, "SJF");
 }
 
+/// Retrieves the current buffer size
+/// \return | The size of the buffer
 int get_buffer_size(){
     int count = 0;
     for (int i = 0; i < 100; i ++){

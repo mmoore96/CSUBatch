@@ -27,7 +27,6 @@ bool active = true;
 //Our input buffer
 char in[255] = "";
 
-
 //This is the main loop of the command loop. It prints the initial prompt, initializes our input buffer,
 //and begins looping, asking for input and carrying out tasks until 'quit' is entered and returns from the loop.
 
@@ -84,52 +83,67 @@ void run(){
 
 }
 
-//Prints job information
+///Prints job information
 void list(){
     print_job_queue();
 }
 
+///Set scheduling to fcfs
 void set_fcfs(){
     set_scheduling(0);
 }
 
+///Set scheduling to sjf
 void set_sjf(){
     set_scheduling(1);
 }
 
+///Set scheduling to priority
 void set_priority(){
     set_scheduling(2);
 }
 
+///Submits a batch of jobs with various attributes and measures performance.
 void test(){
+    clear_node_links();
+    turnaround_time = 0;
+    CPU_time = 0;
+    waiting_time = 0;
     //Declare parameters
     char benchmark_ptr[100]; //Size of 100 is arbitrary
-    char policy_ptr[100]; //Size of largest policy, FCFS, is 4.
+    char policy_ptr[100]; //Size of 100 is arbitrary
     char job_num_ptr[100]; //Size of 100 is arbitrary
     char priority_ptr[100]; //Size of 100 is arbitrary
     char min_cpu_time_ptr[100]; //Size of 100 in arbitrary
     char max_cpu_time_ptr[100]; //Size of 100 is arbitrary
 
+    //Wrap pointers into an array to pass into parse_input
     char *argv[6] = {benchmark_ptr, policy_ptr, job_num_ptr, priority_ptr, min_cpu_time_ptr, max_cpu_time_ptr};
     for (int i = 0; i < 6; i ++){
         memset((void*)argv[i], 0, 100);
     }
 
+    //Separate parameters into separate strings using parse_input
+    //The following block is entered only if parse_input encounters no problems with the user input
     if (parse_input(1, argv)){
         int jobs_num = (int)strtol(job_num_ptr, NULL, 0);
         int priority = (int)strtol(priority_ptr, NULL, 0);
         int min_cpu = (int)strtol(min_cpu_time_ptr, NULL, 0);
         int max_cpu = (int)strtol(max_cpu_time_ptr, NULL, 0);
 
+        //Set scheduling policy. Abort if given unknown polic
         if (!strcmp(policy_ptr, "fcfs")) {
             set_scheduling(0);
         }else if (!strcmp(policy_ptr, "sjf")){
             set_scheduling(1);
-        }else{
+        }else if (!strcmp(policy_ptr, "priority")){
             set_scheduling(2);
+        }else{
+            printf("Unknown policy: %s. Aborting.\n", policy_ptr);
+            return;
         }
 
-
+        //Create jobs and post to job buffer, where it will wait to be inserted into the job queue
         for (int i = 0; i < jobs_num; i ++){
             int job_time = (rand() % (max_cpu - min_cpu + 1)) + min_cpu;
             int job_priority = (rand() % (priority + 1));
@@ -138,21 +152,24 @@ void test(){
             post(job);
         }
 
-        printf("Queueing Jobs...\n");
+        printf("[MAIN] Queueing Jobs...\n");
 
 
+        //Lock the buffer. if the Scheduler hasn't sent the buffer_empty signal already, and the buffer isn't empty, wait.
         pthread_mutex_lock(&buffer_mutex);
         if (!buffer_empty || get_buffer_size() > 0){
             pthread_cond_wait(&buffer_cond, &buffer_mutex);
         }
         pthread_mutex_unlock(&buffer_mutex);
 
-        printf("All jobs are queued or are being executed. Please wait...\n");
+        printf("[MAIN] All jobs are queued or are being executed. Please wait...\n");
 
+        //Indicate to the Dispatcher that the main thread must be notified on each job completion.
         signal_on_job_completion = true;
+        //Notify user on job completion.
         pthread_mutex_lock(&queue_mutex);
-        while (job_queue_length() > 0){
-            printf("%d jobs waiting to be dispatched.\n\t%d being executed\n", job_queue_length(), (current_job != NULL));
+        while (job_queue_length() + (current_job != NULL) > 0){
+            printf("[MAIN] %d jobs waiting to be dispatched.\t%d being executed\n", job_queue_length(), (current_job != NULL));
             pthread_cond_wait(&queue_cond, &queue_mutex);
             pthread_mutex_unlock(&queue_mutex);
         }
@@ -162,11 +179,12 @@ void test(){
         float avg_CPU_time = (float)CPU_time / (float)total_number_of_jobs;
         float avg_waiting_time = (float)waiting_time / (float)total_number_of_jobs;
 
-        printf("Total number of jobs submitted: %d\n", number_of_jobs);
-        printf("Average turnaround time: %.2f\n", avg_CPU_time + avg_waiting_time);
-        printf("Average CPU time: %.2f\n", avg_CPU_time);
-        printf("Average waiting time: %.2f\n", avg_waiting_time);
-        printf("Throughput: %.2f No./second\n", (float)number_of_jobs / (float)(time(NULL) - starting_time));
+        printf("--------------------------------------\n[MAIN] Test finished.\n");
+        printf("[MAIN] Total number of jobs submitted: %d\n", number_of_jobs);
+        printf("[MAIN] Average turnaround time: %.2f\n", avg_CPU_time + avg_waiting_time);
+        printf("[MAIN] Average CPU time: %.2f\n", avg_CPU_time);
+        printf("[MAIN] Average waiting time: %.2f\n", avg_waiting_time);
+        printf("[MAIN] Throughput: %.2f No./second\n", (float)number_of_jobs / (float)(time(NULL) - starting_time));
 
     }else{
 
@@ -175,13 +193,22 @@ void test(){
 
 
 }
-
+/// Quits process
 void quit(){
-    //Free up all job memory
+    //Signal to threads that process is ending
     active = false;
+    //Use cond_signal to unfreeze threads if they are waiting for a resource so they may end
+    pthread_mutex_lock(&queue_mutex);
+    pthread_mutex_lock(&buffer_mutex);
+    pthread_cond_signal(&queue_cond);
+    pthread_cond_signal(&buffer_cond);
+    pthread_mutex_unlock(&queue_mutex);
+    pthread_mutex_unlock(&buffer_mutex);
+
+    //Free allocated memory
     free_job_queue();
     if (total_number_of_jobs > 0){
-        float n_jobs = (float)total_number_of_jobs; //Cast to float for division below.
+        float n_jobs = (float)total_number_of_jobs; //Cast to float for division below
         float avg_CPU_time = (float)CPU_time / n_jobs;
         float avg_waiting_time = (float)waiting_time / n_jobs;
         printf("Total number of jobs submitted: %d\n", (int)n_jobs);
@@ -193,9 +220,42 @@ void quit(){
         printf("As no jobs were ever provided, there are no analytics.\n");
 }
 
-
+/// prints a help string
 void help(){
-    printf(info);
+    //Count variable used to detect if a parameter was provided
+    int count = 0;
+    for (int i = 0; in[i]; i++){
+        count ++;
+    }
+    if (count > 5 && in[5] == '-') {
+        char *param_ptr = in + 6;
+        if (!strncmp(param_ptr, "run", 3)) {
+            printf(run_help);
+        } else if (!strncmp(param_ptr, "list", 4)) {
+            printf(list_help);
+        } else if (!strncmp(param_ptr, "fcfs", 4)) {
+            printf(fcfs_help);
+        } else if (!strncmp(param_ptr, "sjf", 3)) {
+            printf(sjf_help);
+        } else if (!strncmp(param_ptr, "priority", 8)){
+            printf(priority_help);
+        } else if (!strncmp(param_ptr, "test", 4)){
+            printf(test_help);
+        } else if (!strncmp(param_ptr, "quit", 4)){
+            printf(quit_help);
+        } else{
+            printf("Unknown parameter. Use 'help' to get a listing of all commands or 'help -c' where c is a command to get info on that command\n");
+        }
+
+    }else{
+        printf(run_help);
+        printf(list_help);
+        printf(fcfs_help);
+        printf(sjf_help);
+        printf(priority_help);
+        printf(test_help);
+        printf(quit_help);
+    }
 }
 
 /// Splits an input string into an array of strings separated by each word.
@@ -258,6 +318,9 @@ bool parse_input(int command, char* argv[]) {
     return true;
 }
 
+/// Gets the size of a parameter for parses_input.
+/// \param string | The string to tes.
+/// \return | The number of characters read until a non letter was found.
 int get_string_length(const char string[]){
     //If the ascii of the first character in string is less than a or more than z, it is not a valid command.
     if ((int)string[0] < (int)'a' || (int)string[0] > (int)'z'){
@@ -267,6 +330,9 @@ int get_string_length(const char string[]){
     }
 }
 
+/// Test whether a character is numeric
+/// \param c | The character to test
+/// \return | 1 if numeric, 0 if not.
 int is_num(char c){
     int char_code = (int)c;
     if (char_code >= 48 && char_code <= 57){
@@ -276,6 +342,9 @@ int is_num(char c){
     }
 }
 
+/// Test whether a character is a letter
+/// \param c | The character to test.
+/// \return | 1 if letter, 0 if not
 int is_alpha(char c){
     int char_code = (int)c;
     if ((char_code >= 97 && char_code <= 122) || (char_code >= 65 && char_code <= 90)){
@@ -285,7 +354,9 @@ int is_alpha(char c){
     }
 }
 
-// Returns 1 if the string is a number
+/// Test whether string is a number
+/// \param str | The string to test
+/// \return | 1 if numeric, 0 if not
 int is_num_str(const char str[]){
     for (int i = 0; str[i]; i ++){
         if (!is_num(str[i]))
@@ -294,6 +365,8 @@ int is_num_str(const char str[]){
     return 1;
 }
 
+/// Converts string to lowercase
+/// \param str | Pointer to the string to convert.
 void lowercase(char* str){
     for (int i = 0; str[i]; i ++){
         //If char is alphabetical and it's ASCII code is less than 91, convert it to lower case by increasing it by 32
