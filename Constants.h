@@ -23,7 +23,7 @@
 
 #define AUTHORS "Tayler Cooper & George Moore"
 
-#define prompt "Welcome to %s's batch job scheduler Version 0.0\n \
+#define prompt "Welcome to %s's batch job scheduler Version 1.0\n \
                 Type 'help' to find more about CSUbatch commands.\n"
 
 
